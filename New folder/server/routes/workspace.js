@@ -1,4 +1,4 @@
-// workspace.js — User Data Engine Controllers
+// server/workspace.js — Workspace Client Core APIs
 const express = require('express');
 const { pool }  = require('./db');
 const router    = express.Router();
