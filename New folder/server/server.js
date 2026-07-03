@@ -1,42 +1,16 @@
 // server.js — Infinia AI Express Server Engine
 // ---------------------------------------------------------------
-
-const fs = require('fs');
-const path = require('path');
-
-try {
-    const envPath = path.join(__dirname, '.env');
-    if (fs.existsSync(envPath)) {
-        const envContent = fs.readFileSync(envPath, 'utf-8');
-        envContent.split(/\r?\n/).forEach(line => {
-            const trimmed = line.trim();
-            if (trimmed && !trimmed.startsWith('#')) {
-                const delimiterIdx = trimmed.indexOf('=');
-                if (delimiterIdx > 0) {
-                    const key = trimmed.substring(0, delimiterIdx).trim();
-                    let val = trimmed.substring(delimiterIdx + 1).trim();
-                    if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
-                        val = val.substring(1, val.length - 1);
-                    }
-                    process.env[key] = val;
-                }
-            }
-        });
-    }
-} catch (err) {
-    console.error('Error loading .env file:', err);
-}
-
 const express      = require('express');
 const cors         = require('cors');
 const session      = require('express-session');
 const MySQLStore   = require('express-mysql-session')(session);
+const path         = require('path');
 const { pool }     = require('./db');
-const { GoogleGenAI } = require('@google/genai');
 
-// Import route architectures
-const authRouter      = require('./routes/auth');
-const workspaceRouter = require('./routes/workspace');
+// Fixed modules path matching structural resolution mapping
+const authRouter      = require('./auth');
+const workspaceRouter = require('./workspace');
+const { GoogleGenAI } = require('@google/genai');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -78,11 +52,10 @@ app.use(session({
     }
 }));
 
-// Setup Route Mappings
+// Mapped Routes Direct Binding
 app.use('/api/auth', authRouter);
 app.use('/api/workspace', workspaceRouter);
 
-// API Gemini Core Interface
 app.post('/api/chat', async (req, res) => {
     if (!req.session || !req.session.userId) {
         return res.status(401).json({ error: 'Please sign in first.' });
@@ -111,9 +84,8 @@ app.get('*', (req, res) => {
     }
 });
 
-// Vercel serverless integration requires modular binding exports
 module.exports = app;
 
 if (process.env.NODE_ENV !== 'production') {
-    app.listen(PORT, () => console.log(`[LOCAL RUN] Engine listening on port ${PORT}`));
+    app.listen(PORT, () => console.log(`Engine listening on port ${PORT}`));
 }
