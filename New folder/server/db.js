@@ -1,12 +1,10 @@
-// db.js — MySQL2 connection pool
-// -------------------------------------------------------
-// Configure your MySQL credentials below or set ENV vars:
-//   DB_HOST, DB_USER, DB_PASSWORD, DB_NAME, DB_PORT
+// db.js — MySQL2 connection pool with Secure TLS configuration
 // -------------------------------------------------------
 
-// Load environment variables from .env file (zero-dependency custom loader)
 const fs = require('fs');
 const path = require('path');
+
+// Zero-dependency environment file parser 
 try {
     const envPath = path.join(__dirname, '.env');
     if (fs.existsSync(envPath)) {
@@ -32,22 +30,24 @@ try {
 
 const mysql = require('mysql2/promise');
 
+// TiDB Cloud Ke Liye SSL Option add kiya gaya hai
 const pool = mysql.createPool({
     host:     process.env.DB_HOST     || 'localhost',
     port:     parseInt(process.env.DB_PORT || '3306'),
     user:     process.env.DB_USER     || 'root',
-    password: process.env.DB_PASSWORD || '',       // ← set your MySQL password
+    password: process.env.DB_PASSWORD || '',       
     database: process.env.DB_NAME     || 'infinia_ai',
     waitForConnections: true,
     connectionLimit: 10,
-    queueLimit: 0
+    queueLimit: 0,
+    ssl: {
+        rejectUnauthorized: true
+    }
 });
 
-// Test connection to the manual database and verify table existence
 async function testConnection() {
     const conn = await pool.getConnection();
     try {
-        // Query to check if the users table exists
         await conn.query('SELECT 1 FROM users LIMIT 1');
         console.log('[DB] ✅ Database connection verified. All tables are present.');
     } catch (err) {
@@ -61,4 +61,7 @@ async function testConnection() {
     }
 }
 
-module.exports = { pool, testConnection };
+module.exports = {
+    pool,
+    testConnection
+};
