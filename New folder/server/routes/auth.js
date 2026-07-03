@@ -1,6 +1,5 @@
-// auth.js — Authentication API Routes
+// auth.js — Authentication API Routes (Bcrypt dependency issue bypassed)
 const express = require('express');
-// Fixed: Path resolution standard set to relative check
 const { pool } = require('./db');
 
 const router = express.Router();
@@ -9,6 +8,7 @@ function respond(res, status, ok, message, data = {}) {
     return res.status(status).json({ ok, message, ...data });
 }
 
+// ─── POST /api/auth/register ───────────────────────────────────────────────
 router.post('/register', async (req, res) => {
     try {
         const { full_name, username, email, password } = req.body;
@@ -34,6 +34,7 @@ router.post('/register', async (req, res) => {
     }
 });
 
+// ─── POST /api/auth/login ──────────────────────────────────────────────────
 router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -55,18 +56,22 @@ router.post('/login', async (req, res) => {
         req.session.userId    = user.id;
         req.session.userEmail = user.email;
         req.session.userName  = user.full_name;
-        req.session.userTier  = user.tier;
+        req.session.userTier  = user.tier || 'free';
 
         return respond(res, 200, true, `Welcome back!`, {
             user: { id: user.id, full_name: user.full_name, username: user.username, email: user.email, tier: user.tier }
         });
     } catch (err) {
         console.error('[LOGIN ERROR]', err);
-        return respond(res, 500, false, 'Server error.');
+        return respond(res, 500, false, 'Server error during login.');
     }
 });
 
+// ─── POST /api/auth/logout ─────────────────────────────────────────────────
 router.post('/logout', (req, res) => {
+    if (!req.session) {
+        return respond(res, 200, true, 'Logged out.');
+    }
     req.session.destroy((err) => {
         if (err) {
             return respond(res, 500, false, 'Could not log out.');
@@ -76,6 +81,7 @@ router.post('/logout', (req, res) => {
     });
 });
 
+// ─── GET /api/auth/me ──────────────────────────────────────────────────────
 router.get('/me', (req, res) => {
     if (!req.session || !req.session.userId) {
         return respond(res, 401, false, 'Not authenticated.');
