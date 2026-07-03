@@ -1,9 +1,8 @@
-// auth.js — Standard Runtime Authentication Processor Routes
+// auth.js — Lightweight Authentication Endpoint Architecture
 const express = require('express');
 const { pool } = require('./db');
 const router = express.Router();
 
-// Setup internal runtime global token allocation memory instance
 if (!global.serverlessSessionStore) {
     global.serverlessSessionStore = { userId: null, userEmail: null, userName: null };
 }
@@ -30,7 +29,7 @@ router.post('/register', async (req, res) => {
         );
         return respond(res, 201, true, 'Account created successfully!');
     } catch (err) {
-        return respond(res, 500, false, 'Registration framework processing database fault.');
+        return respond(res, 500, false, 'Registration database query exception.');
     }
 });
 
@@ -55,7 +54,7 @@ router.post('/login', async (req, res) => {
             user: { id: user.id, full_name: user.full_name, email: user.email }
         });
     } catch (err) {
-        return respond(res, 500, false, 'Login execution tracking exception.');
+        return respond(res, 500, false, 'Auth stack layer processing error.');
     }
 });
 
