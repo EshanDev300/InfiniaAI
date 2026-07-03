@@ -1,5 +1,4 @@
-// db.js — MySQL2 connection pool with Secure TLS configuration
-// -------------------------------------------------------
+// db.js — MySQL2 Connection Pool Setup
 const fs = require('fs');
 const path = require('path');
 
