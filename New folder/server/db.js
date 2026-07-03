@@ -1,6 +1,5 @@
 // db.js — MySQL2 connection pool with Secure TLS configuration
 // -------------------------------------------------------
-
 const fs = require('fs');
 const path = require('path');
 
@@ -29,7 +28,6 @@ try {
 
 const mysql = require('mysql2/promise');
 
-// Secure configuration tailored for TiDB Cloud Serverless / Aiven MySQL
 const pool = mysql.createPool({
     host:     process.env.DB_HOST     || 'localhost',
     port:     parseInt(process.env.DB_PORT || '3306'),
@@ -44,6 +42,4 @@ const pool = mysql.createPool({
     }
 });
 
-module.exports = {
-    pool
-};
+module.exports = { pool };
