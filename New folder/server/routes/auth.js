@@ -1,4 +1,4 @@
-// auth.js — Session Authentication Routes Architecture
+// auth.js — Session Authentication Layer Controller
 const express = require('express');
 const { pool } = require('./db');
 const router = express.Router();
@@ -25,7 +25,7 @@ router.post('/register', async (req, res) => {
         );
         return respond(res, 201, true, 'Account created successfully!');
     } catch (err) {
-        return respond(res, 500, false, 'Database layer authentication crash.');
+        return respond(res, 500, false, 'Database layer processing registration error.');
     }
 });
 
@@ -51,7 +51,7 @@ router.post('/login', async (req, res) => {
             user: { id: user.id, full_name: user.full_name, email: user.email }
         });
     } catch (err) {
-        return respond(res, 500, false, 'Internal login session crash.');
+        return respond(res, 500, false, 'Session runtime serialization error.');
     }
 });
 
