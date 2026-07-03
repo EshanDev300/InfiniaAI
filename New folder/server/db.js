@@ -1,4 +1,4 @@
-// db.js — MySQL2 connection pool setup with dynamic environment bindings
+// db.js — Optimized Non-blocking Pool Matrix Architecture
 const fs = require('fs');
 const path = require('path');
 
@@ -34,7 +34,7 @@ const pool = mysql.createPool({
     password: process.env.DB_PASSWORD || '',       
     database: process.env.DB_NAME     || 'infinia_ai',
     waitForConnections: true,
-    connectionLimit: 4, 
+    connectionLimit: 3, // Safe minimized concurrency footprint for cloud scaling
     queueLimit: 0,
     ssl: {
         rejectUnauthorized: true
