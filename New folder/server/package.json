@@ -1,7 +1,7 @@
 {
   "name": "infinia-ai",
   "version": "1.0.0",
-  "description": "Infinia AI Workspace Environment Engine",
+  "description": "Infinia AI Workspace Engine",
   "main": "server/server.js",
   "scripts": {
     "start": "node server/server.js"
