@@ -1,7 +1,12 @@
-// auth.js — Session Authentication Layer Controller
+// auth.js — Standard Runtime Authentication Processor Routes
 const express = require('express');
 const { pool } = require('./db');
 const router = express.Router();
+
+// Setup internal runtime global token allocation memory instance
+if (!global.serverlessSessionStore) {
+    global.serverlessSessionStore = { userId: null, userEmail: null, userName: null };
+}
 
 function respond(res, status, ok, message, data = {}) {
     return res.status(status).json({ ok, message, ...data });
@@ -25,7 +30,7 @@ router.post('/register', async (req, res) => {
         );
         return respond(res, 201, true, 'Account created successfully!');
     } catch (err) {
-        return respond(res, 500, false, 'Database layer processing registration error.');
+        return respond(res, 500, false, 'Registration framework processing database fault.');
     }
 });
 
@@ -42,33 +47,33 @@ router.post('/login', async (req, res) => {
         }
 
         const user = rows[0];
-        req.session.userId    = user.id;
-        req.session.userEmail = user.email;
-        req.session.userName  = user.full_name;
-        req.session.userTier  = user.tier || 'free';
+        global.serverlessSessionStore.userId    = user.id;
+        global.serverlessSessionStore.userEmail = user.email;
+        global.serverlessSessionStore.userName  = user.full_name;
 
         return respond(res, 200, true, 'Login successful', {
             user: { id: user.id, full_name: user.full_name, email: user.email }
         });
     } catch (err) {
-        return respond(res, 500, false, 'Session runtime serialization error.');
+        return respond(res, 500, false, 'Login execution tracking exception.');
     }
 });
 
 router.post('/logout', (req, res) => {
-    if (!req.session) return respond(res, 200, true, 'Logged out.');
-    req.session.destroy(() => {
-        res.clearCookie('infinia_session');
-        return respond(res, 200, true, 'Logged out successfully.');
-    });
+    global.serverlessSessionStore = { userId: null, userEmail: null, userName: null };
+    return respond(res, 200, true, 'Logged out successfully.');
 });
 
 router.get('/me', (req, res) => {
-    if (!req.session || !req.session.userId) {
+    if (!global.serverlessSessionStore || !global.serverlessSessionStore.userId) {
         return respond(res, 401, false, 'Not authenticated.');
     }
     return respond(res, 200, true, 'Authenticated.', {
-        user: { id: req.session.userId, email: req.session.userEmail, full_name: req.session.userName }
+        user: { 
+            id: global.serverlessSessionStore.userId, 
+            email: global.serverlessSessionStore.userEmail, 
+            full_name: global.serverlessSessionStore.userName 
+        }
     });
 });
 
