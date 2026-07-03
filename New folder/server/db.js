@@ -4,7 +4,6 @@
 const fs = require('fs');
 const path = require('path');
 
-// Zero-dependency environment file parser 
 try {
     const envPath = path.join(__dirname, '.env');
     if (fs.existsSync(envPath)) {
@@ -30,7 +29,7 @@ try {
 
 const mysql = require('mysql2/promise');
 
-// TiDB Cloud Ke Liye SSL Option add kiya gaya hai
+// Secure configuration tailored for TiDB Cloud Serverless / Aiven MySQL
 const pool = mysql.createPool({
     host:     process.env.DB_HOST     || 'localhost',
     port:     parseInt(process.env.DB_PORT || '3306'),
@@ -38,30 +37,13 @@ const pool = mysql.createPool({
     password: process.env.DB_PASSWORD || '',       
     database: process.env.DB_NAME     || 'infinia_ai',
     waitForConnections: true,
-    connectionLimit: 10,
+    connectionLimit: 5,
     queueLimit: 0,
     ssl: {
         rejectUnauthorized: true
     }
 });
 
-async function testConnection() {
-    const conn = await pool.getConnection();
-    try {
-        await conn.query('SELECT 1 FROM users LIMIT 1');
-        console.log('[DB] ✅ Database connection verified. All tables are present.');
-    } catch (err) {
-        throw new Error(
-            `Database connection failed or tables do not exist. ` +
-            `Please ensure you have created the database "${process.env.DB_NAME || 'infinia_ai'}" ` +
-            `and imported "schema.sql". Error details: ${err.message}`
-        );
-    } finally {
-        conn.release();
-    }
-}
-
 module.exports = {
-    pool,
-    testConnection
+    pool
 };
