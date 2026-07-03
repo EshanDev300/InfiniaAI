@@ -31,8 +31,12 @@ const express      = require('express');
 const cors         = require('cors');
 const session      = require('express-session');
 const MySQLStore   = require('express-mysql-session')(session);
-const { pool, testConnection } = require('./db');
+const { pool }     = require('./db');
 const { GoogleGenAI } = require('@google/genai');
+
+// Import route architectures
+const authRouter      = require('./routes/auth');
+const workspaceRouter = require('./routes/workspace');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -47,7 +51,6 @@ app.use(express.urlencoded({ extended: true }));
 const staticDir = path.join(__dirname, '../');
 app.use(express.static(staticDir));
 
-// Vercel Session Management Fix
 app.set('trust proxy', 1);
 
 const sessionStore = new MySQLStore({
@@ -75,49 +78,15 @@ app.use(session({
     }
 }));
 
-// API Routes
-app.post('/api/auth/signup', async (req, res) => {
-    const { name, email, password } = req.body;
-    try {
-        const [rows] = await pool.query('SELECT id FROM users WHERE email = ?', [email]);
-        if (rows.length > 0) {
-            return res.status(400).json({ message: 'Email already registered.' });
-        }
-        await pool.query('INSERT INTO users (name, email, password) VALUES (?, ?, ?)', [name, email, password]);
-        res.status(201).json({ ok: true });
-    } catch (err) {
-        res.status(500).json({ message: 'Database failure during operations.' });
-    }
-});
+// Setup Route Mappings
+app.use('/api/auth', authRouter);
+app.use('/api/workspace', workspaceRouter);
 
-app.post('/api/auth/login', async (req, res) => {
-    const { email, password } = req.body;
-    try {
-        const [rows] = await pool.query('SELECT * FROM users WHERE email = ? AND password = ?', [email, password]);
-        if (rows.length === 0) {
-            return res.status(401).json({ message: 'Invalid email or password.' });
-        }
-        req.session.userId = rows[0].id;
-        req.session.userName = rows[0].name;
-        res.json({ ok: true });
-    } catch (err) {
-        res.status(500).json({ message: 'Internal server login error.' });
-    }
-});
-
-app.get('/api/auth/user', (req, res) => {
-    if (!req.session.userId) return res.status(401).json({ message: 'Unauthorized' });
-    res.json({ id: req.session.userId, name: req.session.userName });
-});
-
-app.post('/api/auth/logout', (req, res) => {
-    req.session.destroy(() => {
-        res.json({ ok: true });
-    });
-});
-
+// API Gemini Core Interface
 app.post('/api/chat', async (req, res) => {
-    if (!req.session.userId) return res.status(401).json({ error: 'Please sign in first.' });
+    if (!req.session || !req.session.userId) {
+        return res.status(401).json({ error: 'Please sign in first.' });
+    }
     const { message } = req.body;
     try {
         const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
@@ -133,14 +102,18 @@ app.post('/api/chat', async (req, res) => {
 
 app.get('*', (req, res) => {
     if (!req.path.startsWith('/api')) {
-        res.sendFile(path.join(staticDir, 'index.html'));
+        const filePath = path.join(staticDir, req.path);
+        res.sendFile(filePath, (err) => {
+            if (err) {
+                res.sendFile(path.join(staticDir, 'index.html'));
+            }
+        });
     }
 });
 
+// Vercel serverless integration requires modular binding exports
 module.exports = app;
 
 if (process.env.NODE_ENV !== 'production') {
-    testConnection().then(() => {
-        app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-    }).catch(err => console.error(err));
+    app.listen(PORT, () => console.log(`[LOCAL RUN] Engine listening on port ${PORT}`));
 }
