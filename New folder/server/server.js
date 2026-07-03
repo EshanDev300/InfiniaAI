@@ -1,9 +1,8 @@
-// server.js — Infinia AI Express Server Engine
-// ---------------------------------------------------------------
+// server.js — Infinia AI Express Server Engine (Zero-External-Store Session Architecture)
+// ---------------------------------------------------------------------------------
 const express      = require('express');
 const cors         = require('cors');
 const session      = require('express-session');
-const MySQLStore   = require('express-mysql-session')(session);
 const path         = require('path');
 const { pool }     = require('./db');
 
@@ -25,36 +24,24 @@ app.use(express.static(staticDir));
 
 app.set('trust proxy', 1);
 
-const sessionStore = new MySQLStore({
-    createDatabaseTable: true,
-    schema: {
-        tableName: 'sessions',
-        columnNames: {
-            session_id: 'session_id',
-            expires: 'expires',
-            data: 'data'
-        }
-    }
-}, pool);
-
+// Standard Cookie Memory-Store Layer (Bypasses express-mysql-session dependency completely)
 app.use(session({
     key: 'infinia_session',
     secret: process.env.SESSION_SECRET || 'infinia-default-encryption-key-2026',
-    store: sessionStore,
     resave: false,
     saveUninitialized: false,
     cookie: {
         secure: true, 
-        maxAge: 1000 * 60 * 60 * 24,
+        maxAge: 1000 * 60 * 60 * 24, // 24 Hours active lifecycle
         sameSite: 'lax'
     }
 }));
 
-// Route Binding Interfaces
+// Route Interfaces Registration
 app.use('/api/auth', authRouter);
 app.use('/api/workspace', workspaceRouter);
 
-// Gemini Integration Endpoint via Native HTTP Fetch Architecture
+// Native API AI Handler Bridge 
 app.post('/api/chat', async (req, res) => {
     if (!req.session || !req.session.userId) {
         return res.status(401).json({ error: 'Please sign in first.' });
@@ -64,7 +51,7 @@ app.post('/api/chat', async (req, res) => {
     const apiKey = process.env.GEMINI_API_KEY;
 
     if (!apiKey) {
-        return res.status(500).json({ error: 'Gemini API Key missing on server configurations.' });
+        return res.status(500).json({ error: 'Gemini API Key configuration is missing.' });
     }
 
     try {
@@ -81,7 +68,7 @@ app.post('/api/chat', async (req, res) => {
         if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts[0]) {
             return res.json({ reply: data.candidates[0].content.parts[0].text });
         } else {
-            return res.status(500).json({ error: 'Unexpected structure from AI response node.' });
+            return res.status(500).json({ error: 'Unexpected structural layout from AI endpoint.' });
         }
     } catch (err) {
         return res.status(500).json({ error: err.message });
@@ -102,5 +89,5 @@ app.get('*', (req, res) => {
 module.exports = app;
 
 if (process.env.NODE_ENV !== 'production') {
-    app.listen(PORT, () => console.log(`[LOCAL] Server listening on port ${PORT}`));
+    app.listen(PORT, () => console.log(`[ENGINE ACTIVE] Running on port ${PORT}`));
 }
