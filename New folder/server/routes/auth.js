@@ -1,7 +1,6 @@
-// auth.js — Authentication API Routes
+// auth.js — Session Authentication Routes Architecture
 const express = require('express');
 const { pool } = require('./db');
-
 const router = express.Router();
 
 function respond(res, status, ok, message, data = {}) {
@@ -11,7 +10,6 @@ function respond(res, status, ok, message, data = {}) {
 router.post('/register', async (req, res) => {
     try {
         const { full_name, username, email, password } = req.body;
-
         if (!full_name || !username || !email || !password) {
             return respond(res, 400, false, 'All fields are required.');
         }
@@ -25,54 +23,41 @@ router.post('/register', async (req, res) => {
             'INSERT INTO users (full_name, username, email, password) VALUES (?, ?, ?, ?)',
             [full_name.trim(), username.trim().toLowerCase(), email.trim().toLowerCase(), password]
         );
-
         return respond(res, 201, true, 'Account created successfully!');
     } catch (err) {
-        console.error('[REGISTRATION ERROR]', err);
-        return respond(res, 500, false, 'Server error during registration.');
+        return respond(res, 500, false, 'Database layer authentication crash.');
     }
 });
 
 router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
-
         if (!email || !password) {
             return respond(res, 400, false, 'Email and password are required.');
         }
 
         const [rows] = await pool.query('SELECT * FROM users WHERE email = ?', [email.trim().toLowerCase()]);
-        if (rows.length === 0) {
+        if (rows.length === 0 || password !== rows[0].password) {
             return respond(res, 401, false, 'Invalid email or password.');
         }
 
         const user = rows[0];
-        if (password !== user.password) {
-            return respond(res, 401, false, 'Invalid email or password.');
-        }
-
         req.session.userId    = user.id;
         req.session.userEmail = user.email;
         req.session.userName  = user.full_name;
         req.session.userTier  = user.tier || 'free';
 
-        return respond(res, 200, true, `Welcome back!`, {
-            user: { id: user.id, full_name: user.full_name, username: user.username, email: user.email, tier: user.tier }
+        return respond(res, 200, true, 'Login successful', {
+            user: { id: user.id, full_name: user.full_name, email: user.email }
         });
     } catch (err) {
-        console.error('[LOGIN ERROR]', err);
-        return respond(res, 500, false, 'Server error during login.');
+        return respond(res, 500, false, 'Internal login session crash.');
     }
 });
 
 router.post('/logout', (req, res) => {
-    if (!req.session) {
-        return respond(res, 200, true, 'Logged out.');
-    }
-    req.session.destroy((err) => {
-        if (err) {
-            return respond(res, 500, false, 'Could not log out.');
-        }
+    if (!req.session) return respond(res, 200, true, 'Logged out.');
+    req.session.destroy(() => {
         res.clearCookie('infinia_session');
         return respond(res, 200, true, 'Logged out successfully.');
     });
@@ -82,13 +67,8 @@ router.get('/me', (req, res) => {
     if (!req.session || !req.session.userId) {
         return respond(res, 401, false, 'Not authenticated.');
     }
-    return respond(res, 200, true, 'Session active.', {
-        user: {
-            id: req.session.userId,
-            email: req.session.userEmail,
-            full_name: req.session.userName,
-            tier: req.session.userTier
-        }
+    return respond(res, 200, true, 'Authenticated.', {
+        user: { id: req.session.userId, email: req.session.userEmail, full_name: req.session.userName }
     });
 });
 
