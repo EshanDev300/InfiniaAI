@@ -50,11 +50,11 @@ app.use(session({
     }
 }));
 
-// Route Mapping Middleware
+// Route Binding Interfaces
 app.use('/api/auth', authRouter);
 app.use('/api/workspace', workspaceRouter);
 
-// Gemini Chat Endpoint — Optimized with zero-dependency direct HTTP REST request
+// Gemini Integration Endpoint via Native HTTP Fetch Architecture
 app.post('/api/chat', async (req, res) => {
     if (!req.session || !req.session.userId) {
         return res.status(401).json({ error: 'Please sign in first.' });
@@ -64,11 +64,10 @@ app.post('/api/chat', async (req, res) => {
     const apiKey = process.env.GEMINI_API_KEY;
 
     if (!apiKey) {
-        return res.status(500).json({ error: 'Gemini API Key configuration is missing on server env.' });
+        return res.status(500).json({ error: 'Gemini API Key missing on server configurations.' });
     }
 
     try {
-        // Dynamic fetch calling official Google AI API directly to bypass native modules loading error
         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -82,7 +81,7 @@ app.post('/api/chat', async (req, res) => {
         if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts[0]) {
             return res.json({ reply: data.candidates[0].content.parts[0].text });
         } else {
-            return res.status(500).json({ error: 'Unexpected layout response from AI Engine.' });
+            return res.status(500).json({ error: 'Unexpected structure from AI response node.' });
         }
     } catch (err) {
         return res.status(500).json({ error: err.message });
@@ -103,5 +102,5 @@ app.get('*', (req, res) => {
 module.exports = app;
 
 if (process.env.NODE_ENV !== 'production') {
-    app.listen(PORT, () => console.log(`Engine listening on port ${PORT}`));
+    app.listen(PORT, () => console.log(`[LOCAL] Server listening on port ${PORT}`));
 }
