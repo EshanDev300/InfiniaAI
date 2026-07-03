@@ -1,16 +1,9 @@
 // routes/auth.js — Authentication API Routes
-// POST /api/register  — Create new account
-// POST /api/login     — Login and start session
-// POST /api/logout    — End session
-// GET  /api/me        — Return current session user
-
 const express = require('express');
-const bcrypt  = require('bcryptjs');
 const { pool } = require('../db');
 
 const router = express.Router();
 
-// ─── Helper ────────────────────────────────────────────────────────────────
 function respond(res, status, ok, message, data = {}) {
     return res.status(status).json({ ok, message, ...data });
 }
@@ -20,7 +13,6 @@ router.post('/register', async (req, res) => {
     try {
         const { full_name, username, email, password } = req.body;
 
-        // ── Validation ──
         if (!full_name || !username || !email || !password) {
             return respond(res, 400, false, 'All fields are required.');
         }
@@ -33,38 +25,21 @@ router.post('/register', async (req, res) => {
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
             return respond(res, 400, false, 'Please enter a valid email address.');
         }
-        // Strong password regex: min 8 chars, 1 uppercase, 1 lowercase, 1 digit, 1 special char
-        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
-        if (!passwordRegex.test(password)) {
-            return respond(res, 400, false, 'Password must be at least 8 characters and include uppercase, lowercase, a number, and a special character (e.g. !@#$%).');
+
+        const [existing] = await pool.query('SELECT id FROM users WHERE email = ? OR username = ?', [email, username]);
+        if (existing.length > 0) {
+            return respond(res, 409, false, 'Email or Username already taken.');
         }
 
-        // ── Check existing user ──
-        const [existingEmail] = await pool.query('SELECT id FROM users WHERE email = ?', [email.toLowerCase()]);
-        if (existingEmail.length > 0) {
-            return respond(res, 409, false, 'This email is already registered. Please login instead.');
-        }
-        const [existingUsername] = await pool.query('SELECT id FROM users WHERE username = ?', [username.toLowerCase()]);
-        if (existingUsername.length > 0) {
-            return respond(res, 409, false, 'This username is already taken. Please choose another.');
-        }
-
-        // ── Hash password ──
-        const hashedPassword = await bcrypt.hash(password, 12);
-
-        // ── Insert user ──
-        const [result] = await pool.query(
-            'INSERT INTO users (full_name, username, email, password, tier) VALUES (?, ?, ?, ?, ?)',
-            [full_name.trim(), username.trim().toLowerCase(), email.toLowerCase(), hashedPassword, 'FREE']
+        await pool.query(
+            'INSERT INTO users (full_name, username, email, password) VALUES (?, ?, ?, ?)',
+            [full_name.trim(), username.trim().toLowerCase(), email.trim().toLowerCase(), password]
         );
 
-        return respond(res, 201, true, 'Account created successfully! Welcome to Infinia AI.', {
-            user: { id: result.insertId, full_name: full_name.trim(), username: username.trim().toLowerCase(), email: email.toLowerCase(), tier: 'FREE' }
-        });
-
+        return respond(res, 201, true, 'Account created successfully!');
     } catch (err) {
-        console.error('[REGISTER ERROR]', err);
-        return respond(res, 500, false, 'Server error. Please try again later.');
+        console.error('[REGISTRATION ERROR]', err);
+        return respond(res, 500, false, 'Server error during registration.');
     }
 });
 
@@ -76,24 +51,17 @@ router.post('/login', async (req, res) => {
         if (!email || !password) {
             return respond(res, 400, false, 'Email and password are required.');
         }
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            return respond(res, 400, false, 'Enter a valid email address.');
-        }
 
-        // ── Find user ──
-        const [rows] = await pool.query('SELECT * FROM users WHERE email = ?', [email.toLowerCase()]);
+        const [rows] = await pool.query('SELECT * FROM users WHERE email = ?', [email.trim().toLowerCase()]);
         if (rows.length === 0) {
-            return respond(res, 401, false, 'Email not registered. Please create an account first.');
+            return respond(res, 401, false, 'Invalid email or password.');
         }
+
         const user = rows[0];
-
-        // ── Check password ──
-        const passwordMatch = await bcrypt.compare(password, user.password);
-        if (!passwordMatch) {
-            return respond(res, 401, false, 'Incorrect password. Please try again.');
+        if (password !== user.password) {
+            return respond(res, 401, false, 'Invalid email or password.');
         }
 
-        // ── Create session ──
         req.session.userId    = user.id;
         req.session.userEmail = user.email;
         req.session.userName  = user.full_name;
@@ -102,7 +70,6 @@ router.post('/login', async (req, res) => {
         return respond(res, 200, true, `Welcome back, ${user.full_name}!`, {
             user: { id: user.id, full_name: user.full_name, username: user.username, email: user.email, tier: user.tier }
         });
-
     } catch (err) {
         console.error('[LOGIN ERROR]', err);
         return respond(res, 500, false, 'Server error. Please try again later.');
@@ -115,7 +82,7 @@ router.post('/logout', (req, res) => {
         if (err) {
             return respond(res, 500, false, 'Could not log out. Please try again.');
         }
-        res.clearCookie('infinia.sid');
+        res.clearCookie('infinia_session');
         return respond(res, 200, true, 'Logged out successfully.');
     });
 });
@@ -127,10 +94,10 @@ router.get('/me', (req, res) => {
     }
     return respond(res, 200, true, 'Session active.', {
         user: {
-            id:        req.session.userId,
-            email:     req.session.userEmail,
+            id: req.session.userId,
+            email: req.session.userEmail,
             full_name: req.session.userName,
-            tier:      req.session.userTier
+            tier: req.session.userTier
         }
     });
 });
