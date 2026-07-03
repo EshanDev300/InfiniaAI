@@ -1,10 +1,10 @@
+// ai.js — Core AI Workspace Interface Client Module
 (function () {
     'use strict';
 
     const messagesArea = document.getElementById('messages-area');
     const chatInput = document.getElementById('chat-input');
     const sendBtn = document.getElementById('send-btn');
-    const userNameDisplay = document.getElementById('user-name-display');
     const logoutBtn = document.getElementById('logout-btn');
 
     async function checkAuth() {
@@ -13,9 +13,7 @@
             const data = await res.json();
             if (!data.ok) {
                 window.location.href = 'index.html?toast=please_login';
-                return;
             }
-            if (userNameDisplay) userNameDisplay.textContent = data.user.full_name;
         } catch (err) {
             window.location.href = 'index.html?toast=please_login';
         }
@@ -49,10 +47,10 @@
             if (response.ok) {
                 appendBubble('bot', data.reply);
             } else {
-                appendBubble('bot', `Error: ${data.error || 'Failed request'}`);
+                appendBubble('bot', `Error: ${data.error || 'Request processing failure.'}`);
             }
         } catch (err) {
-            appendBubble('bot', 'Network Connection Timeout.');
+            appendBubble('bot', 'Network interface connection timeout.');
         }
     }
 
