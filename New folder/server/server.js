@@ -7,7 +7,6 @@ const MySQLStore   = require('express-mysql-session')(session);
 const path         = require('path');
 const { pool }     = require('./db');
 
-// Fixed modules path matching structural resolution mapping
 const authRouter      = require('./auth');
 const workspaceRouter = require('./workspace');
 const { GoogleGenAI } = require('@google/genai');
@@ -52,7 +51,7 @@ app.use(session({
     }
 }));
 
-// Mapped Routes Direct Binding
+// Route Mapping Middleware
 app.use('/api/auth', authRouter);
 app.use('/api/workspace', workspaceRouter);
 
