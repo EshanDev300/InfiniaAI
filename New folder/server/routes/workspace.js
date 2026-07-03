@@ -1,4 +1,4 @@
-// workspace.js — User Private Context Data API Routes
+// workspace.js — User Data Engine Controllers
 const express = require('express');
 const { pool }  = require('./db');
 const router    = express.Router();
