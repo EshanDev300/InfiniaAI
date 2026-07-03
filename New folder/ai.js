@@ -1,17 +1,9 @@
-// ═══════════════════════════════════════════════════════════════
-//  INFINIA AI — Complete Workspace JavaScript
-// ═══════════════════════════════════════════════════════════════
-
 (function () {
     'use strict';
 
-    // Fix: Localhost हटा दिया है ताकी Vercel रिलेटिव रूटिंग यूज़ करे
     const API_BASE = '';
 
     let currentUser = null;
-    let currentMessages = []; 
-    let hasGeminiKey = false; 
-    let chatMode = true; 
 
     // --- 3D BACKGROUND (DNA Helix + Particles) ---
     (function init3D() {
@@ -62,29 +54,27 @@
         render3D();
     })();
 
-    // DOM Selection Elements
     const messagesArea = document.getElementById('messages-area');
     const chatInput = document.getElementById('chat-input');
     const sendBtn = document.getElementById('send-btn');
     const userNameDisplay = document.getElementById('user-name-display');
     const logoutBtn = document.getElementById('logout-btn');
 
-    // --- Core Session Verification Gate ---
     async function checkAuth() {
         try {
-            const res = await fetch(`${API_BASE}/api/auth/user`, { method: 'GET' });
-            if (!res.ok) {
+            const res = await fetch(`${API_BASE}/api/auth/me`, { method: 'GET' });
+            const data = await res.json();
+            if (!res.ok || !data.ok) {
                 window.location.href = 'index.html?toast=please_login';
                 return;
             }
-            currentUser = await res.json();
-            if (userNameDisplay) userNameDisplay.textContent = currentUser.name;
+            currentUser = data.user;
+            if (userNameDisplay) userNameDisplay.textContent = currentUser.full_name;
         } catch (err) {
             window.location.href = 'index.html?toast=please_login';
         }
     }
 
-    // --- Trigger Core Actions ---
     if (sendBtn && chatInput) {
         sendBtn.addEventListener('click', sendMessage);
         chatInput.addEventListener('keydown', (e) => {
@@ -126,7 +116,7 @@
                 appendMessage('bot', `Error: ${data.error || 'Failed to analyze request'}`);
             }
         } catch (err) {
-            appendMessage('bot', 'Network Connection Timeout. Server configuration failed.');
+            appendMessage('bot', 'Network Connection Timeout.');
         }
     }
 
@@ -139,15 +129,10 @@
         messagesArea.scrollTop = messagesArea.scrollHeight;
     }
 
-    function showToast(msg, isError = false) {
-        alert(msg);
-    }
-
     function escapeHtml(str) {
         if (!str) return '';
         return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     }
 
-    // Run auth check automatically on startup
     checkAuth();
 })();
