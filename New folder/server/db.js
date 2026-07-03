@@ -1,4 +1,4 @@
-// db.js — Optimized Non-blocking Pool Matrix Architecture
+// server/db.js — MySQL Connection Pool System
 const fs = require('fs');
 const path = require('path');
 
@@ -34,7 +34,7 @@ const pool = mysql.createPool({
     password: process.env.DB_PASSWORD || '',       
     database: process.env.DB_NAME     || 'infinia_ai',
     waitForConnections: true,
-    connectionLimit: 3, // Safe minimized concurrency footprint for cloud scaling
+    connectionLimit: 3, 
     queueLimit: 0,
     ssl: {
         rejectUnauthorized: true
