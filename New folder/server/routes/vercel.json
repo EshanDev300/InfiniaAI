@@ -1,9 +1,10 @@
 {
   "version": 2,
   "builds": [
-    { "src": "server.js", "use": "@vercel/node" }
+    { "src": "New folder/server/server.js", "use": "@vercel/node" }
   ],
   "routes": [
-    { "src": "/(.*)", "dest": "server.js" }
+    { "src": "/api/(.*)", "dest": "New folder/server/server.js" },
+    { "src": "/(.*)", "dest": "New folder/$1" }
   ]
 }
