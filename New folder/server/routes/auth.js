@@ -1,4 +1,4 @@
-// auth.js — Authentication API Routes (Bcrypt dependency issue bypassed)
+// auth.js — Authentication API Routes
 const express = require('express');
 const { pool } = require('./db');
 
@@ -8,7 +8,6 @@ function respond(res, status, ok, message, data = {}) {
     return res.status(status).json({ ok, message, ...data });
 }
 
-// ─── POST /api/auth/register ───────────────────────────────────────────────
 router.post('/register', async (req, res) => {
     try {
         const { full_name, username, email, password } = req.body;
@@ -34,7 +33,6 @@ router.post('/register', async (req, res) => {
     }
 });
 
-// ─── POST /api/auth/login ──────────────────────────────────────────────────
 router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -67,7 +65,6 @@ router.post('/login', async (req, res) => {
     }
 });
 
-// ─── POST /api/auth/logout ─────────────────────────────────────────────────
 router.post('/logout', (req, res) => {
     if (!req.session) {
         return respond(res, 200, true, 'Logged out.');
@@ -81,7 +78,6 @@ router.post('/logout', (req, res) => {
     });
 });
 
-// ─── GET /api/auth/me ──────────────────────────────────────────────────────
 router.get('/me', (req, res) => {
     if (!req.session || !req.session.userId) {
         return respond(res, 401, false, 'Not authenticated.');
