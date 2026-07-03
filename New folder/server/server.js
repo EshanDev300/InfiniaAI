@@ -9,7 +9,6 @@ const { pool }     = require('./db');
 
 const authRouter      = require('./auth');
 const workspaceRouter = require('./workspace');
-const { GoogleGenAI } = require('@google/genai');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -55,20 +54,38 @@ app.use(session({
 app.use('/api/auth', authRouter);
 app.use('/api/workspace', workspaceRouter);
 
+// Gemini Chat Endpoint — Optimized with zero-dependency direct HTTP REST request
 app.post('/api/chat', async (req, res) => {
     if (!req.session || !req.session.userId) {
         return res.status(401).json({ error: 'Please sign in first.' });
     }
+    
     const { message } = req.body;
+    const apiKey = process.env.GEMINI_API_KEY;
+
+    if (!apiKey) {
+        return res.status(500).json({ error: 'Gemini API Key configuration is missing on server env.' });
+    }
+
     try {
-        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-        const aiResponse = await ai.models.generateContent({
-            model: 'gemini-2.5-flash',
-            contents: message,
+        // Dynamic fetch calling official Google AI API directly to bypass native modules loading error
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: message }] }]
+            })
         });
-        res.json({ reply: aiResponse.text });
+
+        const data = await response.json();
+        
+        if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts[0]) {
+            return res.json({ reply: data.candidates[0].content.parts[0].text });
+        } else {
+            return res.status(500).json({ error: 'Unexpected layout response from AI Engine.' });
+        }
     } catch (err) {
-        res.status(500).json({ error: err.message });
+        return res.status(500).json({ error: err.message });
     }
 });
 
