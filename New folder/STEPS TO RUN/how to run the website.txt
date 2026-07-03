@@ -1,0 +1,93 @@
+How to Run the Infinia AI Website (Manual Database Setup)
+=========================================================
+
+1. Configure the Environment
+----------------------------
+Open the configuration file `server/.env` and enter your MySQL credentials and Google Gemini API Key:
+
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=your_mysql_password
+DB_NAME=infinia_ai
+SESSION_SECRET=infinia_super_secret_key_2026_xR9!qZ
+GEMINI_API_KEY=your_gemini_api_key_from_google_ai_studio
+
+
+2. Start MySQL and Import the Schema
+------------------------------------
+Ensure your local MySQL server is running (e.g., via XAMPP, WampServer, Docker, or your native Windows MySQL Service on port 3306).
+
+Import the SQL schema file `server/schema.sql` to manually create the database and tables:
+* If using XAMPP/phpMyAdmin:
+  1. Open http://localhost/phpmyadmin in your browser.
+  2. Click on the "Import" tab at the top.
+  3. Click "Choose File" and select `server/schema.sql`.
+  4. Click "Import" or "Go" at the bottom to execute.
+* If using Command Line:
+  mysql -u root -p < "c:\Users\dell\Downloads\New folder\server\schema.sql"
+
+
+3. Install Server Dependencies
+------------------------------
+Open PowerShell or Command Prompt, navigate to the `server/` directory, and install the required Node.js packages:
+
+cd "c:\Users\dell\Downloads\New folder\server"
+npm install
+
+
+4. Launch the Server
+--------------------
+Start the Express server:
+
+node server.js
+(Or run `npm run dev` for automatic server restarts during development).
+
+Once started successfully, you will see:
+[DB] ✅ Database connection verified. All tables are present.
+╔══════════════════════════════════════════════════╗
+║         🚀  INFINIA AI SERVER STARTED            ║
+║   → http://localhost:3000                        ║
+║   → Login:  http://localhost:3000/index.html     ║
+║   → Signup: http://localhost:3000/signup.html    ║
+║   → AI:     http://localhost:3000/ai.html        ║
+╚══════════════════════════════════════════════════╝
+
+
+5. Access and Verify the Site
+-----------------------------
+1. Open your browser and go to http://localhost:3000/index.html
+2. Click "Create account" to register a new user.
+3. Log in with your new credentials and start using the Infinia AI workspace!
+
+----IMPORTANT
+
+Step 3: Run the Server on Port 3000
+Open a new PowerShell or Command Prompt and run the following commands:
+
+Navigate to the server directory:
+powershell
+
+
+cd "c:\Users\dell\Downloads\New folder\server"
+Install the website's dependencies (runs once):
+powershell
+
+
+npm install
+Start the server:
+powershell
+
+
+node server.js
+The website will start automatically on port 3000. You will see this output in your terminal:
+
+text
+
+
+[DB] ✅ Database connection verified. All tables are present.
+╔══════════════════════════════════════════════════╗
+║         🚀  INFINIA AI SERVER STARTED            ║
+║   → http://localhost:3000                        ║
+╚══════════════════════════════════════════════════╝
+You can now open your browser and go to: http://localhost:3000 to use the website!

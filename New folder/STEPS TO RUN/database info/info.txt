@@ -1,0 +1,9 @@
+# Database Connection Parameters
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=root
+DB_PASSWORD=
+DB_NAME=infinia_ai
+
+# Session Security Key
+SESSION_SECRET=infinia_super_secret_key_2026_xR9!qZ

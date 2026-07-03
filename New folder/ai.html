@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Infinia AI | Next-Gen Intelligence Workspace</title>
+    <meta name="description" content="Infinia AI workspace — your personal AI assistant powered by Google Gemini. Chat, save, organize, and create.">
+    <!-- Google Fonts, Font Awesome, Marked, Highlight.js -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <!-- Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://js.puter.com/v2/"></script>
+    <link rel="stylesheet" href="ai.css">
+</head>
+<body>
+<div id="canvas-container"></div>
+
+<!-- Mobile Overlay -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<div class="app">
+    <!-- LEFT SIDEBAR -->
+    <div class="sidebar" id="mainSidebar">
+        <div class="sidebar-header">
+            <button class="new-chat-btn" id="newChatBtn"><i class="fas fa-plus-circle"></i> <span>New Chat</span></button>
+        </div>
+        <div class="sidebar-nav">
+            <div class="nav-category">MAIN</div>
+            <div class="nav-item" id="navSearchChats"><i class="fas fa-search"></i> <span>Search Chats</span></div>
+            <div class="nav-item" id="navLibrary"><i class="fas fa-book"></i> <span>Library</span></div>
+            <div class="nav-item" id="navProjects"><i class="fas fa-folder"></i> <span>Projects</span></div>
+            <div class="nav-item" id="navApps"><i class="fas fa-th"></i> <span>Apps</span></div>
+            <div class="nav-item" id="navCodex"><i class="fas fa-code"></i> <span>Codex</span></div>
+            <div class="nav-category">WORKSPACE</div>
+            <div class="nav-item" id="navWorkspace"><i class="fas fa-layer-group"></i> <span>Workspace</span></div>
+            <div class="nav-item" id="navKnowledge"><i class="fas fa-database"></i> <span>Knowledge Base</span></div>
+            <div class="nav-item" id="navAgents"><i class="fas fa-robot"></i> <span>AI Agents</span></div>
+            <div class="nav-item" id="navTemplates"><i class="fas fa-clipboard-list"></i> <span>Templates</span></div>
+            <div class="nav-item" id="navCommunity"><i class="fas fa-users"></i> <span>Community</span></div>
+            <div class="nav-category">HISTORY</div>
+            <div class="nav-item" id="navHistory"><i class="fas fa-history"></i> <span>Chat History</span></div>
+            <div class="nav-item" id="navFavorites"><i class="fas fa-star"></i> <span>Favorites</span></div>
+            <div class="nav-item" id="navArchived"><i class="fas fa-archive"></i> <span>Archived Chats</span></div>
+            <div class="nav-category">ACCOUNT</div>
+            <div class="nav-item" id="sidebarSignOut"><i class="fas fa-sign-out-alt"></i> <span>Sign Out</span></div>
+        </div>
+    </div>
+
+    <!-- MAIN WORKSPACE -->
+    <div class="main">
+        <!-- Top Nav -->
+        <div class="top-nav">
+            <!-- Hamburger for mobile -->
+            <button class="hamburger-btn" id="hamburgerBtn"><i class="fas fa-bars"></i></button>
+            <div class="logo-area"><i class="fas fa-brain logo-icon"></i><span class="logo-text">INFINIA AI</span></div>
+            <div class="nav-actions">
+                <button class="nav-icon" id="navSearchBtn" title="Search"><i class="fas fa-search"></i></button>
+                <button class="nav-icon" id="navBellBtn" title="Notifications"><i class="fas fa-bell"></i></button>
+                <button class="nav-icon" id="settingsIcon" title="Settings"><i class="fas fa-cog"></i></button>
+                <button class="nav-icon" id="themeToggle" title="Toggle Theme"><i class="fas fa-moon"></i></button>
+                <div class="profile-pic" id="profilePicBtn" title="Profile"><i class="fas fa-user-astronaut"></i></div>
+                <div class="subscription" id="subscriptionBadge"><i class="fas fa-gem"></i> <span id="tierBadge">FREE</span></div>
+                <!-- Access Dropdown -->
+                <div class="dropdown" id="accessDropdown">
+                    <button class="nav-icon dropdown-trigger-btn" id="dropdownTrigger"><i class="fas fa-user-circle"></i> <span id="navUsername">User</span> <i class="fas fa-chevron-down" style="font-size:0.65rem;"></i></button>
+                    <div class="dropdown-menu">
+                        <a id="navProfileBtn"><i class="fas fa-user"></i> Profile Details</a>
+                        <a id="navSaveChatBtn"><i class="fas fa-save"></i> Save Current Chat</a>
+                        <a id="navSignOutBtn"><i class="fas fa-sign-out-alt"></i> Sign Out</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Model Bar -->
+        <div class="model-bar">
+            <div class="model-selector"><i class="fas fa-microchip"></i>
+                <select id="modelSelect" class="model-dropdown">
+                    <option value="AI Simple">AI Simple ⚡ (Gemini 1.5 Flash)</option>
+                    <option value="AI Plus">AI Plus 🚀 (Gemini 2.0 Flash)</option>
+                    <option value="AI Pro" selected>AI Pro 🧠 (Gemini 1.5 Pro)</option>
+                    <option value="AI Ultra">AI Ultra ✨ (Gemini 2.0 Thinking)</option>
+                    <option value="Flux Image">Flux.1 Image 🎨 (FREE Flux.1)</option>
+                    <option value="Flux Realism">Flux Realism 📸 (Photographic)</option>
+                    <option value="Flux Anime">Flux Anime 🌸 (Anime Style)</option>
+                    <option value="Luma Video">Luma Video 🎬 (FREE Video)</option>
+                    <option value="Nova Reel">Nova Reel Video 🍿 (Movie Style)</option>
+                </select>
+                <span class="model-badge" id="modelCapability">Context: 128K · Speed: High</span>
+            </div>
+            <div class="tools-dropdown" id="toolsDropdownBtn"><i class="fas fa-toolbox"></i> <span>AI Tools</span> <i class="fas fa-chevron-down" style="font-size:0.65rem;margin-left:4px;"></i></div>
+            <div class="tools-panel" id="toolsPanel"></div>
+        </div>
+
+        <!-- Chat Interface -->
+        <div class="chat-container">
+            <div class="messages-area" id="messagesArea">
+                <div class="message bot"><div class="message-bubble">🚀 Welcome to **Infinia AI** — next-gen intelligence. Ask me anything, use tools, or upload files.</div></div>
+            </div>
+
+            <!-- Prompt Suggestions -->
+            <div class="suggestions-area" id="suggestionsArea">
+                <div class="suggestion-chip" data-prompt="Explain quantum computing in simple terms"><i class="fas fa-atom"></i> Quantum Computing</div>
+                <div class="suggestion-chip" data-prompt="Write a Python script to sort a list"><i class="fas fa-code"></i> Python Sort Script</div>
+                <div class="suggestion-chip" data-prompt="Give me 5 startup ideas for 2026"><i class="fas fa-lightbulb"></i> Startup Ideas</div>
+                <div class="suggestion-chip" data-prompt="How do I center a div in CSS?"><i class="fab fa-css3-alt"></i> Center a Div</div>
+                <div class="suggestion-chip" data-prompt="Write a professional cold email template"><i class="fas fa-envelope"></i> Cold Email</div>
+                <div class="suggestion-chip" data-prompt="Summarize the latest trends in AI"><i class="fas fa-robot"></i> AI Trends</div>
+                <div class="suggestion-chip" data-prompt="Explain REST API vs GraphQL"><i class="fas fa-exchange-alt"></i> REST vs GraphQL</div>
+                <div class="suggestion-chip" data-prompt="Help me debug this JavaScript error"><i class="fas fa-bug"></i> Debug JS</div>
+            </div>
+
+            <div class="input-area">
+                <textarea id="chatInput" rows="1" placeholder="Ask Infinia AI anything... (Shift+Enter for new line)"></textarea>
+                <div class="input-actions">
+                    <button class="action-btn" id="voiceBtn" title="Voice Input"><i class="fas fa-microphone"></i></button>
+                    <button class="action-btn" id="fileUploadBtn" title="Attach File"><i class="fas fa-paperclip"></i></button>
+                    <button class="action-btn" id="imageUploadBtn" title="Upload Image"><i class="fas fa-image"></i></button>
+                    <button class="action-btn save-chat-btn" id="saveChatBtn" title="Save Chat"><i class="fas fa-bookmark"></i></button>
+                    <button class="action-btn send-btn" id="sendBtn" title="Send"><i class="fas fa-paper-plane"></i></button>
+                </div>
+            </div>
+            <div class="input-hint">Drag &amp; drop files anywhere · <kbd>Enter</kbd> to send · <kbd>Shift+Enter</kbd> for new line</div>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden file inputs -->
+<input type="file" id="fileInput" style="display:none;">
+<input type="file" id="imageInput" accept="image/*" style="display:none;">
+
+<!-- ══════════════════════════════════════════════
+     PANELS (Library, Projects, Chat History)
+══════════════════════════════════════════════ -->
+
+<!-- Library Panel -->
+<div id="libraryPanel" class="side-panel">
+    <div class="side-panel-header">
+        <h3><i class="fas fa-book"></i> Prompt Library</h3>
+        <button class="panel-close-btn" data-panel="libraryPanel"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="side-panel-actions">
+        <button class="panel-add-btn" id="addLibraryBtn"><i class="fas fa-plus"></i> Save Current Prompt</button>
+    </div>
+    <div class="side-panel-body" id="libraryList">
+        <div class="panel-empty"><i class="fas fa-book-open"></i><br>No saved prompts yet.<br><small>Save a prompt using the button above.</small></div>
+    </div>
+</div>
+
+<!-- Projects Panel -->
+<div id="projectsPanel" class="side-panel">
+    <div class="side-panel-header">
+        <h3><i class="fas fa-folder"></i> Projects</h3>
+        <button class="panel-close-btn" data-panel="projectsPanel"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="side-panel-actions">
+        <button class="panel-add-btn" id="addProjectBtn"><i class="fas fa-plus"></i> New Project</button>
+    </div>
+    <div class="side-panel-body" id="projectsList">
+        <div class="panel-empty"><i class="fas fa-folder-open"></i><br>No projects yet.<br><small>Create a project to organize your work.</small></div>
+    </div>
+</div>
+
+<!-- Chat History Panel -->
+<div id="historyPanel" class="side-panel">
+    <div class="side-panel-header">
+        <h3><i class="fas fa-history"></i> Chat History</h3>
+        <button class="panel-close-btn" data-panel="historyPanel"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="side-panel-body" id="historyList">
+        <div class="panel-empty"><i class="fas fa-comment-slash"></i><br>No saved chats yet.<br><small>Save a chat using the bookmark icon.</small></div>
+    </div>
+</div>
+
+<!-- Panel Backdrop -->
+<div class="panel-backdrop" id="panelBackdrop"></div>
+
+<!-- ══════════════════════════════════════════════
+     MODALS
+══════════════════════════════════════════════ -->
+
+<!-- Settings Modal -->
+<div id="settingsModal" class="modal-overlay">
+    <div class="glass-card modal-content">
+        <button class="modal-close" id="closeSettingsBtn"><i class="fas fa-times"></i></button>
+        <h3 class="modal-title"><i class="fas fa-cog"></i> Workspace Settings</h3>
+        <div class="setting-row">
+            <label class="setting-label">System Mode / AI Behavior</label>
+            <input type="text" id="settingSystemPrompt" class="setting-input" placeholder="e.g. Speak like a pirate, be concise">
+        </div>
+        <div class="setting-row">
+            <label class="setting-label">Temperature: <span id="tempValue">0.7</span></label>
+            <div class="setting-range-container">
+                <input type="range" id="settingTemperature" class="setting-range" min="0" max="1" step="0.1" value="0.7">
+            </div>
+        </div>
+        <div class="setting-row">
+            <label class="setting-label">Max Response Tokens: <span id="tokenValue">2048</span></label>
+            <div class="setting-range-container">
+                <input type="range" id="settingMaxTokens" class="setting-range" min="256" max="4096" step="256" value="2048">
+            </div>
+        </div>
+        <div class="setting-row">
+            <label class="setting-label">Pollinations AI API Key (For Video Generation & High Speed)</label>
+            <input type="text" id="settingPollinationsKey" class="setting-input" placeholder="Paste pk_ or sk_ key (Optional)">
+        </div>
+        <button class="save-settings-btn" id="saveSettingsBtn">Save Configuration</button>
+    </div>
+</div>
+
+<!-- Save Chat Modal -->
+<div id="saveChatModal" class="modal-overlay">
+    <div class="glass-card modal-content" style="max-width:420px;">
+        <button class="modal-close" id="closeSaveChatBtn"><i class="fas fa-times"></i></button>
+        <h3 class="modal-title"><i class="fas fa-bookmark"></i> Save Chat</h3>
+        <div class="setting-row">
+            <label class="setting-label">Chat Title</label>
+            <input type="text" id="saveChatTitle" class="setting-input" placeholder="Give this chat a name...">
+        </div>
+        <button class="save-settings-btn" id="confirmSaveChatBtn"><i class="fas fa-save"></i> Save Chat</button>
+    </div>
+</div>
+
+<!-- Add Library Modal -->
+<div id="addLibraryModal" class="modal-overlay">
+    <div class="glass-card modal-content" style="max-width:420px;">
+        <button class="modal-close" id="closeLibraryModalBtn"><i class="fas fa-times"></i></button>
+        <h3 class="modal-title"><i class="fas fa-book"></i> Save to Library</h3>
+        <div class="setting-row">
+            <label class="setting-label">Prompt Title</label>
+            <input type="text" id="libraryTitle" class="setting-input" placeholder="e.g. Email Template">
+        </div>
+        <div class="setting-row">
+            <label class="setting-label">Prompt Content</label>
+            <textarea id="libraryContent" class="setting-input" rows="4" placeholder="Paste your prompt here..."></textarea>
+        </div>
+        <button class="save-settings-btn" id="confirmAddLibraryBtn"><i class="fas fa-save"></i> Save to Library</button>
+    </div>
+</div>
+
+<!-- Add Project Modal -->
+<div id="addProjectModal" class="modal-overlay">
+    <div class="glass-card modal-content" style="max-width:420px;">
+        <button class="modal-close" id="closeProjectModalBtn"><i class="fas fa-times"></i></button>
+        <h3 class="modal-title"><i class="fas fa-folder-plus"></i> New Project</h3>
+        <div class="setting-row">
+            <label class="setting-label">Project Name</label>
+            <input type="text" id="projectName" class="setting-input" placeholder="e.g. Website Redesign">
+        </div>
+        <div class="setting-row">
+            <label class="setting-label">Description (optional)</label>
+            <textarea id="projectDescription" class="setting-input" rows="3" placeholder="What is this project about?"></textarea>
+        </div>
+        <button class="save-settings-btn" id="confirmAddProjectBtn"><i class="fas fa-plus"></i> Create Project</button>
+    </div>
+</div>
+
+<script src="ai.js"></script>
+
+</body>
+</html>

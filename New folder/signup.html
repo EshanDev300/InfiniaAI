@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Infinia AI | Create Account</title>
+    <meta name="description" content="Join Infinia AI — the next-generation intelligence platform. Create your account today and unlock the future of AI.">
+    <!-- Google Fonts & Font Awesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Three.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<link rel="stylesheet" href="style.css">
+<style>
+    /* Page entry animation */
+    @keyframes pageSlideIn {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes logoFloat {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-6px); }
+    }
+    @keyframes glowPulse {
+        0%, 100% { box-shadow: 0 0 20px rgba(0, 255, 255, 0.3), 0 20px 40px rgba(0,0,0,0.4); }
+        50% { box-shadow: 0 0 40px rgba(0, 255, 255, 0.6), 0 20px 50px rgba(0, 80, 255, 0.3); }
+    }
+    @keyframes inputFocusGlow {
+        from { box-shadow: 0 0 0px rgba(0, 255, 255, 0); }
+        to { box-shadow: 0 0 18px rgba(0, 255, 255, 0.5); }
+    }
+    @keyframes btnShimmer {
+        0% { background-position: -200% center; }
+        100% { background-position: 200% center; }
+    }
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes iconSpin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    @keyframes checkmarkPop {
+        0% { transform: scale(0); opacity: 0; }
+        70% { transform: scale(1.2); }
+        100% { transform: scale(1); opacity: 1; }
+    }
+    @keyframes strengthFill {
+        from { width: 0; }
+        to { width: var(--strength-width); }
+    }
+    @keyframes particleFloat {
+        0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.6; }
+        50% { transform: translateY(-20px) rotate(180deg); opacity: 1; }
+    }
+
+    .app-wrapper {
+        animation: pageSlideIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    .logo-icon {
+        animation: logoFloat 3s ease-in-out infinite;
+    }
+
+    .glass-card {
+        animation: glowPulse 4s ease-in-out infinite;
+        transform-origin: center;
+    }
+
+    /* Floating particles behind the card */
+    .floating-particle {
+        position: fixed;
+        pointer-events: none;
+        z-index: 5;
+        border-radius: 50%;
+        animation: particleFloat 4s ease-in-out infinite;
+    }
+
+    /* Step indicator */
+    .step-indicator {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-bottom: 1.8rem;
+    }
+    .step-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: rgba(0, 255, 255, 0.25);
+        border: 1px solid rgba(0, 255, 255, 0.4);
+        transition: all 0.4s ease;
+        cursor: pointer;
+    }
+    .step-dot.active {
+        background: #0ff;
+        box-shadow: 0 0 10px cyan;
+        transform: scale(1.3);
+    }
+    .step-dot.done {
+        background: rgba(0, 255, 100, 0.8);
+        box-shadow: 0 0 8px lime;
+    }
+
+    /* Input wrapper with animated border */
+    .input-wrapper {
+        position: relative;
+        margin-bottom: 1.3rem;
+    }
+    .input-wrapper label {
+        display: block;
+        margin-bottom: 0.4rem;
+        font-weight: 500;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+        color: #b5d0ff;
+        transition: color 0.3s;
+    }
+    .input-wrapper:focus-within label {
+        color: #0ff;
+    }
+    .input-wrapper .input-field {
+        transition: all 0.3s cubic-bezier(0.2, 0.8, 0.4, 1);
+    }
+    .input-wrapper .input-field:focus {
+        transform: translateY(-1px);
+    }
+
+    /* Input icon */
+    .input-icon {
+        position: relative;
+    }
+    .input-icon .fa-icon-left {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: rgba(0, 255, 255, 0.5);
+        font-size: 0.9rem;
+        transition: color 0.3s;
+        pointer-events: none;
+    }
+    .input-icon:focus-within .fa-icon-left {
+        color: #0ff;
+    }
+    .input-icon .input-field {
+        padding-left: 2.8rem;
+    }
+
+    /* Eye toggle for passwords */
+    .toggle-eye {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: rgba(0, 255, 255, 0.4);
+        cursor: pointer;
+        font-size: 0.85rem;
+        transition: color 0.2s;
+    }
+    .toggle-eye:hover { color: #0ff; }
+
+    /* Password requirement checklist */
+    .pwd-req {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        color: rgba(200, 200, 255, 0.5);
+        transition: color 0.3s;
+        font-size: 0.76rem;
+    }
+    .pwd-req i { font-size: 0.8rem; }
+
+    /* Password strength */
+    .strength-bar-wrapper {
+        margin-top: 6px;
+        height: 4px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    .strength-bar-fill {
+        height: 100%;
+        border-radius: 10px;
+        transition: width 0.4s ease, background 0.4s ease;
+        width: 0%;
+    }
+    .strength-label {
+        font-size: 0.72rem;
+        margin-top: 4px;
+        font-weight: 500;
+        transition: color 0.3s;
+    }
+
+    /* Animated checkbox */
+    .terms-row {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        margin-bottom: 1.5rem;
+        font-size: 0.82rem;
+        color: #a0c0e0;
+    }
+    .custom-checkbox {
+        display: none;
+    }
+    .checkbox-visual {
+        width: 22px;
+        height: 22px;
+        min-width: 22px;
+        border-radius: 8px;
+        border: 2px solid rgba(0, 255, 255, 0.5);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        margin-top: 1px;
+    }
+    .custom-checkbox:checked + .checkbox-visual {
+        background: linear-gradient(135deg, #00ccff, #9f00ff);
+        border-color: #0ff;
+        box-shadow: 0 0 12px rgba(0, 255, 255, 0.6);
+    }
+    .custom-checkbox:checked + .checkbox-visual::after {
+        content: '✓';
+        color: white;
+        font-size: 0.75rem;
+        font-weight: 800;
+        animation: checkmarkPop 0.3s ease both;
+    }
+
+    /* Submit button shimmer */
+    .btn-glow-shimmer {
+        width: 100%;
+        border: none;
+        padding: 1rem;
+        border-radius: 2rem;
+        font-weight: 700;
+        font-size: 1rem;
+        color: white;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(90deg, #0066ff, #9f00ff, #0066ff);
+        background-size: 200% auto;
+        transition: all 0.3s;
+        box-shadow: 0 0 12px rgba(0, 102, 255, 0.5);
+        letter-spacing: 0.5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+    .btn-glow-shimmer:hover {
+        animation: btnShimmer 1.5s linear infinite;
+        box-shadow: 0 0 25px rgba(0, 255, 255, 0.7);
+        transform: translateY(-2px);
+    }
+    .btn-glow-shimmer:active {
+        transform: scale(0.98);
+    }
+    .btn-glow-shimmer .btn-spinner {
+        display: none;
+        width: 18px;
+        height: 18px;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: iconSpin 0.7s linear infinite;
+    }
+    .btn-glow-shimmer.loading .btn-text { display: none; }
+    .btn-glow-shimmer.loading .btn-spinner { display: block; }
+
+    /* Field validation icons */
+    .field-ok-icon {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #00ff88;
+        font-size: 0.85rem;
+        display: none;
+        animation: checkmarkPop 0.3s ease both;
+    }
+    .input-field.valid ~ .field-ok-icon { display: block; }
+
+    /* Nav back link */
+    .nav-back-link {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.85rem;
+        color: #8ab0d0;
+        cursor: pointer;
+        text-decoration: none;
+        transition: color 0.2s, gap 0.2s;
+    }
+    .nav-back-link:hover {
+        color: #0ff;
+        gap: 12px;
+    }
+
+    /* Divider */
+    .or-divider {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 1.2rem 0;
+        font-size: 0.8rem;
+        color: rgba(150, 170, 200, 0.7);
+    }
+    .or-divider::before,
+    .or-divider::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: rgba(0, 255, 255, 0.15);
+    }
+
+    /* Success overlay */
+    .success-overlay {
+        display: none;
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 20, 30, 0.92);
+        backdrop-filter: blur(10px);
+        border-radius: 2rem;
+        z-index: 50;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        text-align: center;
+        padding: 2rem;
+        animation: pageSlideIn 0.5s ease both;
+    }
+    .success-overlay.show { display: flex; }
+    .success-circle {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #00ff88, #00ccff);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+        color: #010a15;
+        animation: glowPulse 2s ease infinite, checkmarkPop 0.5s ease both;
+    }
+    .success-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, #00ff88, #0ff);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+    }
+    .success-sub {
+        color: #a0c0e0;
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+
+    /* Card wrapper relative */
+    .glass-card { position: relative; overflow: hidden; }
+
+    /* Hover glow border */
+    .glass-card::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: 2rem;
+        background: linear-gradient(135deg, rgba(0,255,255,0.06), rgba(160,0,255,0.06));
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.4s;
+    }
+    .glass-card:hover::before { opacity: 1; }
+
+    /* Benefits strip */
+    .benefits-strip {
+        display: flex;
+        justify-content: center;
+        gap: 1.5rem;
+        margin-top: 1.2rem;
+        flex-wrap: wrap;
+    }
+    .benefit-chip {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.72rem;
+        color: rgba(180, 210, 255, 0.8);
+        background: rgba(0, 255, 255, 0.07);
+        border: 1px solid rgba(0, 255, 255, 0.2);
+        border-radius: 20px;
+        padding: 4px 12px;
+        transition: all 0.3s;
+    }
+    .benefit-chip:hover {
+        background: rgba(0, 255, 255, 0.18);
+        color: #0ff;
+        border-color: #0ff;
+        transform: translateY(-2px);
+    }
+    .benefit-chip i { font-size: 0.7rem; color: #0ff; }
+</style>
+</head>
+<body>
+    <div id="canvas-container"></div>
+    <div class="app-wrapper">
+        <nav class="navbar">
+            <div class="logo-area">
+                <i class="fas fa-brain logo-icon"></i>
+                <span class="logo-text">INFINIA AI</span>
+            </div>
+            <div class="nav-links">
+                <a href="index.html" class="nav-back-link">
+                    <i class="fas fa-arrow-left"></i> Back to Login
+                </a>
+                <div class="theme-toggle" id="themeToggle">
+                    <i class="fas fa-moon"></i>
+                </div>
+            </div>
+        </nav>
+
+        <div class="auth-container">
+            <!-- SIGNUP CARD -->
+            <div class="glass-card" id="signup-card">
+                <!-- Success Overlay (shown after registration) -->
+                <div class="success-overlay" id="successOverlay">
+                    <div class="success-circle">✓</div>
+                    <div class="success-title">Account Created!</div>
+                    <p class="success-sub">Welcome to the Infinia AI community.<br>Redirecting you to login...</p>
+                </div>
+
+                <div class="card-header">
+                    <h2><i class="fas fa-user-astronaut" style="font-size:1.5rem; background: linear-gradient(135deg,#0ff,#a0f); -webkit-background-clip:text; background-clip:text; color:transparent;"></i> Join Infinia AI</h2>
+                    <p style="font-size: 0.85rem; opacity:0.8; margin-top: 4px;">Create your intelligence workspace today</p>
+                </div>
+
+                <!-- Step Indicator -->
+                <div class="step-indicator">
+                    <div class="step-dot active" data-step="0" title="Personal Info"></div>
+                    <div class="step-dot" data-step="1" title="Security"></div>
+                    <div class="step-dot" data-step="2" title="Confirm"></div>
+                </div>
+
+                <form id="signupForm" novalidate autocomplete="off">
+                    <!-- Step 1: Personal Info -->
+                    <div class="form-step" id="step-0">
+                        <div class="input-wrapper">
+                            <label>Full Name</label>
+                            <div class="input-icon">
+                                <i class="fas fa-user fa-icon-left"></i>
+                                <input type="text" class="input-field" id="fullName" placeholder="John Doe" required autocomplete="off">
+                            </div>
+                        </div>
+                        <div class="input-wrapper">
+                            <label>Username</label>
+                            <div class="input-icon">
+                                <i class="fas fa-at fa-icon-left"></i>
+                                <input type="text" class="input-field" id="username" placeholder="johndoe_ai" required autocomplete="off">
+                            </div>
+                        </div>
+                        <div class="input-wrapper">
+                            <label>Email Address</label>
+                            <div class="input-icon">
+                                <i class="fas fa-envelope fa-icon-left"></i>
+                                <input type="email" class="input-field" id="signupEmail" placeholder="hello@infinia.ai" required autocomplete="off">
+                            </div>
+                        </div>
+                        <button type="button" class="btn-glow-shimmer" id="nextBtn1">
+                            <span class="btn-text"><i class="fas fa-arrow-right"></i> Continue</span>
+                            <span class="btn-spinner"></span>
+                        </button>
+                    </div>
+
+                    <!-- Step 2: Password (hidden initially) -->
+                    <div class="form-step" id="step-1" style="display:none;">
+                        <div class="input-wrapper">
+                            <label>Password</label>
+                            <div class="input-icon" style="position: relative;">
+                                <i class="fas fa-lock fa-icon-left"></i>
+                                <input type="password" class="input-field" id="signupPassword" placeholder="Min 8 chars, A-z, 0-9, !@#" required autocomplete="new-password">
+                                <i class="fas fa-eye toggle-eye" id="togglePwd1"></i>
+                            </div>
+                            <div class="strength-bar-wrapper">
+                                <div class="strength-bar-fill" id="strengthFill"></div>
+                            </div>
+                            <div class="strength-label" id="strengthLabel"></div>
+                            <!-- Password Requirements Checklist -->
+                            <div id="pwdRequirements" style="margin-top:10px; font-size:0.76rem; display:grid; grid-template-columns:1fr 1fr; gap:4px 12px;">
+                                <div id="req-len"  class="pwd-req"><i class="fas fa-circle-xmark"></i> Min 8 characters</div>
+                                <div id="req-upper" class="pwd-req"><i class="fas fa-circle-xmark"></i> Uppercase letter</div>
+                                <div id="req-lower" class="pwd-req"><i class="fas fa-circle-xmark"></i> Lowercase letter</div>
+                                <div id="req-digit" class="pwd-req"><i class="fas fa-circle-xmark"></i> Number (0–9)</div>
+                                <div id="req-special" class="pwd-req"><i class="fas fa-circle-xmark"></i> Special char (!@#$)</div>
+                            </div>
+                        </div>
+                        <div class="input-wrapper">
+                            <label>Confirm Password</label>
+                            <div class="input-icon" style="position: relative;">
+                                <i class="fas fa-shield-alt fa-icon-left"></i>
+                                <input type="password" class="input-field" id="confirmPassword" placeholder="Re-enter password" required autocomplete="new-password">
+                                <i class="fas fa-eye toggle-eye" id="togglePwd2"></i>
+                            </div>
+                        </div>
+                        <div style="display:flex; gap:10px;">
+                            <button type="button" class="btn-glow-shimmer" id="backBtn1" style="background: rgba(80,80,120,0.5); flex: 0.4;">
+                                <span class="btn-text"><i class="fas fa-arrow-left"></i></span>
+                            </button>
+                            <button type="button" class="btn-glow-shimmer" id="nextBtn2" style="flex: 1;">
+                                <span class="btn-text"><i class="fas fa-arrow-right"></i> Continue</span>
+                                <span class="btn-spinner"></span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Confirm & Terms (hidden initially) -->
+                    <div class="form-step" id="step-2" style="display:none;">
+                        <!-- Account summary preview -->
+                        <div id="accountSummary" style="background: rgba(0,255,255,0.06); border: 1px solid rgba(0,255,255,0.2); border-radius: 1rem; padding: 1rem 1.2rem; margin-bottom: 1.4rem; font-size: 0.85rem; color: #b5d0ff; line-height: 1.8;"></div>
+
+                        <div class="terms-row">
+                            <input type="checkbox" class="custom-checkbox" id="termsCheck">
+                            <label for="termsCheck" class="checkbox-visual"></label>
+                            <span>I agree to the <a href="#" class="terms-link" onclick="showTermsModal(event)">Terms of Service</a> and <a href="#" class="terms-link" onclick="showTermsModal(event)">Privacy Policy</a> of Infinia AI.</span>
+                        </div>
+
+                        <div style="display:flex; gap:10px;">
+                            <button type="button" class="btn-glow-shimmer" id="backBtn2" style="background: rgba(80,80,120,0.5); flex: 0.4;">
+                                <span class="btn-text"><i class="fas fa-arrow-left"></i></span>
+                            </button>
+                            <button type="submit" class="btn-glow-shimmer" id="createAccountBtn" style="flex: 1;">
+                                <span class="btn-text"><i class="fas fa-rocket"></i> Create Account</span>
+                                <span class="btn-spinner"></span>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="or-divider">or sign up with</div>
+                <div class="social-login">
+                    <div class="social-icon" data-platform="Google"><i class="fab fa-google"></i></div>
+                    <div class="social-icon" data-platform="Apple"><i class="fab fa-apple"></i></div>
+                    <div class="social-icon" data-platform="GitHub"><i class="fab fa-github"></i></div>
+                </div>
+                <hr>
+                <div style="text-align:center; font-size:0.8rem;">Already have an account? <a href="index.html" class="forgot-link">Sign In</a></div>
+
+                <!-- Benefits strip -->
+                <div class="benefits-strip">
+                    <div class="benefit-chip"><i class="fas fa-shield-alt"></i> Secure</div>
+                    <div class="benefit-chip"><i class="fas fa-bolt"></i> Fast</div>
+                    <div class="benefit-chip"><i class="fas fa-gem"></i> Ultra Tier</div>
+                    <div class="benefit-chip"><i class="fas fa-infinity"></i> Unlimited</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Terms Modal -->
+    <div id="termsModal" class="modal-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,5,15,0.85); backdrop-filter:blur(12px); align-items:center; justify-content:center; z-index:2000;">
+        <div style="background: rgba(10,18,30,0.97); border: 1px solid rgba(0,255,255,0.4); border-radius: 2rem; max-width: 500px; width: 90%; padding: 2.5rem; position:relative; max-height: 80vh; overflow-y:auto;">
+            <button onclick="closeTermsModal()" style="position:absolute; top:1.5rem; right:1.5rem; background:none; border:none; color:#ccddf8; font-size:1.5rem; cursor:pointer; transition:0.2s;" onmouseover="this.style.color='#0ff'; this.style.transform='rotate(90deg)';" onmouseout="this.style.color='#ccddf8'; this.style.transform='rotate(0deg);'"><i class="fas fa-times"></i></button>
+            <h3 style="font-size:1.5rem; font-weight:700; background: linear-gradient(135deg,#fff,#0ff); -webkit-background-clip:text; background-clip:text; color:transparent; margin-bottom:1.2rem;"><i class="fas fa-scroll"></i> Terms of Service</h3>
+            <p style="color:#a0c0e0; line-height: 1.8; font-size: 0.88rem;">
+                By using Infinia AI you agree to use this platform responsibly. We don't store personal data beyond your session preferences. This is a demonstration product. All AI-generated responses are simulated. Do not share sensitive information. Infinia AI reserves the right to update these terms at any time. By creating an account, you consent to receiving platform notifications.
+            </p>
+            <button onclick="closeTermsModal()" style="margin-top:1.5rem; width:100%; background: linear-gradient(90deg, #0066ff, #9f00ff); color:white; border:none; padding:0.8rem; border-radius:1.5rem; font-weight:700; cursor:pointer; transition:0.2s;" onmouseover="this.style.boxShadow='0 0 15px cyan'" onmouseout="this.style.boxShadow=''">Got it!</button>
+        </div>
+    </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// ---- 3D BACKGROUND (same as index) ----
+(function() {
+    const container = document.getElementById('canvas-container');
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x020610);
+    scene.fog = new THREE.FogExp2(0x020610, 0.003);
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 2, 12);
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    container.appendChild(renderer.domElement);
+
+    const ambientLight = new THREE.AmbientLight(0x222222);
+    scene.add(ambientLight);
+    const pointLight = new THREE.PointLight(0x2266ff, 1, 30);
+    pointLight.position.set(2, 3, 4);
+    scene.add(pointLight);
+    const purpleLight = new THREE.PointLight(0xaa44ff, 0.7);
+    purpleLight.position.set(-2, 1, 5);
+    scene.add(purpleLight);
+
+    // Central Torus Knot
+    const knotGeo = new THREE.TorusKnotGeometry(1.2, 0.3, 180, 24, 3, 4);
+    const knotMat = new THREE.MeshStandardMaterial({ color: 0x00ccff, emissive: 0x004466, roughness: 0.3, metalness: 0.8 });
+    const knot = new THREE.Mesh(knotGeo, knotMat);
+    scene.add(knot);
+
+    // Floating shapes
+    const shapesGroup = [];
+    const colors = [0xff44cc, 0x44ffcc, 0xffaa44];
+    for (let i = 0; i < 30; i++) {
+        const geo = new THREE.IcosahedronGeometry(0.18, 0);
+        const mat = new THREE.MeshStandardMaterial({ color: colors[i % colors.length], emissive: 0x331133, roughness: 0.2 });
+        const mesh = new THREE.Mesh(geo, mat);
+        mesh.position.set((Math.random() - 0.5) * 12, (Math.random() - 0.5) * 6, (Math.random() - 0.5) * 8 - 4);
+        mesh.userData = { speedX: (Math.random() - 0.5) * 0.008, speedY: (Math.random() - 0.5) * 0.008, rotSpeed: 0.01 };
+        scene.add(mesh);
+        shapesGroup.push(mesh);
+    }
+
+    // Particles
+    const particleCount = 1500;
+    const particlesGeo = new THREE.BufferGeometry();
+    const positions = new Float32Array(particleCount * 3);
+    for (let i = 0; i < particleCount; i++) {
+        positions[i*3] = (Math.random() - 0.5) * 30;
+        positions[i*3+1] = (Math.random() - 0.5) * 18;
+        positions[i*3+2] = (Math.random() - 0.5) * 20 - 8;
+    }
+    particlesGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    const particleMat = new THREE.PointsMaterial({ color: 0x33aaff, size: 0.05, transparent: true, blending: THREE.AdditiveBlending });
+    const particleSystem = new THREE.Points(particlesGeo, particleMat);
+    scene.add(particleSystem);
+
+    // Ring
+    const ringGeo = new THREE.TorusGeometry(1.8, 0.05, 64, 300);
+    const ringMat = new THREE.MeshStandardMaterial({ color: 0x00aaff, emissive: 0x0066aa });
+    const ring = new THREE.Mesh(ringGeo, ringMat);
+    ring.rotation.x = Math.PI / 2;
+    scene.add(ring);
+
+    let time = 0;
+    function animate() {
+        requestAnimationFrame(animate);
+        time += 0.016;
+        knot.rotation.x += 0.008;
+        knot.rotation.y += 0.012;
+        knot.rotation.z += 0.007;
+        ring.rotation.z += 0.005;
+        shapesGroup.forEach(obj => {
+            obj.position.x += obj.userData.speedX;
+            obj.position.y += obj.userData.speedY;
+            if (Math.abs(obj.position.x) > 9) obj.userData.speedX *= -1;
+            if (Math.abs(obj.position.y) > 6) obj.userData.speedY *= -1;
+            obj.rotation.x += obj.userData.rotSpeed;
+            obj.rotation.y += obj.userData.rotSpeed;
+        });
+        particleSystem.rotation.y += 0.0005;
+        camera.position.x += (0 - camera.position.x) * 0.02;
+        camera.lookAt(0, 0.2, 0);
+        renderer.render(scene, camera);
+    }
+    animate();
+    window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+})();
+
+// ---- TOAST FUNCTION ----
+function showToast(message, isError = false) {
+    const existing = document.querySelector('.toast-msg');
+    if (existing) existing.remove();
+    const toast = document.createElement('div');
+    toast.className = 'toast-msg';
+    toast.style.borderLeftColor = isError ? '#ff4466' : '#0ff';
+    toast.style.boxShadow = isError ? '0 0 15px #ff4466' : '0 0 15px cyan';
+    toast.innerHTML = `<i class="fas ${isError ? 'fa-exclamation-triangle' : 'fa-check-circle'}" style="margin-right:10px;"></i> ${message}`;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3500);
+}
+
+// ---- THEME TOGGLE ----
+(function() {
+    const themeToggle = document.getElementById('themeToggle');
+    const icon = themeToggle.querySelector('i');
+    let isLight = localStorage.getItem('theme') === 'light';
+    function applyTheme(light) {
+        if (light) {
+            document.body.classList.add('light');
+            icon.className = "fas fa-sun";
+        } else {
+            document.body.classList.remove('light');
+            icon.className = "fas fa-moon";
+        }
+    }
+    applyTheme(isLight);
+    themeToggle.addEventListener('click', () => {
+        isLight = !isLight;
+        localStorage.setItem('theme', isLight ? 'light' : 'dark');
+        applyTheme(isLight);
+        showToast(isLight ? "Light mode activated" : "Dark mode restored");
+    });
+})();
+
+// ---- MULTI-STEP FORM ----
+let currentStep = 0;
+const totalSteps = 3;
+
+function showStep(step) {
+    for (let i = 0; i < totalSteps; i++) {
+        const el = document.getElementById(`step-${i}`);
+        const dot = document.querySelector(`.step-dot[data-step="${i}"]`);
+        if (el) {
+            if (i === step) {
+                el.style.display = 'block';
+                el.style.animation = 'pageSlideIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) both';
+            } else {
+                el.style.display = 'none';
+            }
+        }
+        if (dot) {
+            dot.classList.remove('active', 'done');
+            if (i < step) dot.classList.add('done');
+            else if (i === step) dot.classList.add('active');
+        }
+    }
+    currentStep = step;
+}
+
+// Next Step 1 -> 2 (personal info validation)
+document.getElementById('nextBtn1').addEventListener('click', () => {
+    const fullName = document.getElementById('fullName').value.trim();
+    const username = document.getElementById('username').value.trim();
+    const email = document.getElementById('signupEmail').value.trim();
+    if (!fullName || fullName.length < 2) {
+        showToast("Please enter your full name (min 2 characters).", true);
+        document.getElementById('fullName').focus();
+        return;
+    }
+    if (!username || username.length < 3) {
+        showToast("Username must be at least 3 characters.", true);
+        document.getElementById('username').focus();
+        return;
+    }
+    if (!email || !email.includes('@') || !email.includes('.')) {
+        showToast("Please enter a valid email address.", true);
+        document.getElementById('signupEmail').focus();
+        return;
+    }
+    // Animate button loading
+    const btn = document.getElementById('nextBtn1');
+    btn.classList.add('loading');
+    setTimeout(() => {
+        btn.classList.remove('loading');
+        showStep(1);
+        document.getElementById('signupPassword').focus();
+    }, 600);
+});
+
+// Back Step 2 -> 1
+document.getElementById('backBtn1').addEventListener('click', () => showStep(0));
+
+// Next Step 2 -> 3 (password validation with regex)
+document.getElementById('nextBtn2').addEventListener('click', () => {
+    const pass = document.getElementById('signupPassword').value;
+    const confirm = document.getElementById('confirmPassword').value;
+    const pwdRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
+    if (!pwdRegex.test(pass)) {
+        showToast("Password must be 8+ chars with uppercase, lowercase, number & special character.", true);
+        document.getElementById('signupPassword').focus();
+        return;
+    }
+    if (pass !== confirm) {
+        showToast("Passwords do not match. Please re-enter.", true);
+        document.getElementById('confirmPassword').focus();
+        document.getElementById('confirmPassword').style.borderColor = '#ff4466';
+        setTimeout(() => { document.getElementById('confirmPassword').style.borderColor = ''; }, 2000);
+        return;
+    }
+    // Build account summary
+    const fullName = document.getElementById('fullName').value.trim();
+    const username = document.getElementById('username').value.trim();
+    const email = document.getElementById('signupEmail').value.trim();
+    document.getElementById('accountSummary').innerHTML = `
+        <div style="font-weight:600; color:#0ff; margin-bottom:6px;">📋 Account Preview</div>
+        <div>👤 <strong>Name:</strong> ${fullName}</div>
+        <div>🔖 <strong>Username:</strong> @${username}</div>
+        <div>📧 <strong>Email:</strong> ${email}</div>
+        <div>🔒 <strong>Password:</strong> ${'•'.repeat(Math.min(pass.length, 10))}</div>
+    `;
+    const btn = document.getElementById('nextBtn2');
+    btn.classList.add('loading');
+    setTimeout(() => {
+        btn.classList.remove('loading');
+        showStep(2);
+    }, 600);
+});
+
+// Back Step 3 -> 2
+document.getElementById('backBtn2').addEventListener('click', () => showStep(1));
+
+// ---- PASSWORD STRENGTH + REGEX REQUIREMENTS ----
+document.getElementById('signupPassword').addEventListener('input', function() {
+    const val = this.value;
+    const fill = document.getElementById('strengthFill');
+    const label = document.getElementById('strengthLabel');
+
+    // Requirement checks
+    const checks = {
+        'req-len':     val.length >= 8,
+        'req-upper':   /[A-Z]/.test(val),
+        'req-lower':   /[a-z]/.test(val),
+        'req-digit':   /[0-9]/.test(val),
+        'req-special': /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(val)
+    };
+    let strength = Object.values(checks).filter(Boolean).length;
+    Object.entries(checks).forEach(([id, passed]) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const icon = el.querySelector('i');
+        if (passed) {
+            el.style.color = '#00ff88';
+            if (icon) { icon.className = 'fas fa-circle-check'; }
+        } else {
+            el.style.color = 'rgba(200,200,255,0.5)';
+            if (icon) { icon.className = 'fas fa-circle-xmark'; }
+        }
+    });
+
+    const levels = [
+        { pct: '0%',   color: 'transparent', text: '' },
+        { pct: '20%',  color: '#ff4466', text: 'Very Weak' },
+        { pct: '40%',  color: '#ff8844', text: 'Weak' },
+        { pct: '60%',  color: '#ffcc00', text: 'Fair' },
+        { pct: '80%',  color: '#44ff88', text: 'Strong' },
+        { pct: '100%', color: '#00ccff', text: 'Very Strong ✓' },
+    ];
+    const lvl = levels[strength] || levels[0];
+    fill.style.width = lvl.pct;
+    fill.style.background = lvl.color;
+    label.textContent = lvl.text;
+    label.style.color = lvl.color;
+});
+
+// ---- CONFIRM PASSWORD REAL-TIME CHECK ----
+document.getElementById('confirmPassword').addEventListener('input', function() {
+    const pass = document.getElementById('signupPassword').value;
+    if (this.value && this.value === pass) {
+        this.style.borderColor = '#00ff88';
+        this.style.boxShadow = '0 0 10px rgba(0,255,136,0.4)';
+    } else if (this.value) {
+        this.style.borderColor = '#ff4466';
+        this.style.boxShadow = '0 0 10px rgba(255,68,102,0.4)';
+    } else {
+        this.style.borderColor = '';
+        this.style.boxShadow = '';
+    }
+});
+
+// ---- EYE TOGGLES ----
+document.getElementById('togglePwd1').addEventListener('click', function() {
+    const field = document.getElementById('signupPassword');
+    const isText = field.type === 'text';
+    field.type = isText ? 'password' : 'text';
+    this.classList.toggle('fa-eye', isText);
+    this.classList.toggle('fa-eye-slash', !isText);
+});
+document.getElementById('togglePwd2').addEventListener('click', function() {
+    const field = document.getElementById('confirmPassword');
+    const isText = field.type === 'text';
+    field.type = isText ? 'password' : 'text';
+    this.classList.toggle('fa-eye', isText);
+    this.classList.toggle('fa-eye-slash', !isText);
+});
+
+// ── API base ──
+const API_BASE = window.location.protocol === 'file:' ? 'http://localhost:3000' : '';
+
+// ---- FORM SUBMIT (MySQL backend) ----
+document.getElementById('signupForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const terms = document.getElementById('termsCheck').checked;
+    if (!terms) {
+        showToast('Please agree to the Terms & Conditions to continue.', true);
+        const checkboxVisual = document.querySelector('.checkbox-visual');
+        checkboxVisual.style.animation = 'none';
+        checkboxVisual.style.transform = 'translateX(0)';
+        setTimeout(() => {
+            checkboxVisual.style.transition = 'transform 0.1s';
+            checkboxVisual.style.transform = 'translateX(5px)';
+            setTimeout(() => { checkboxVisual.style.transform = 'translateX(-5px)'; setTimeout(() => { checkboxVisual.style.transform = ''; }, 100); }, 100);
+        }, 50);
+        return;
+    }
+
+    const fullName = document.getElementById('fullName').value.trim();
+    const username = document.getElementById('username').value.trim();
+    const email    = document.getElementById('signupEmail').value.trim();
+    const pass     = document.getElementById('signupPassword').value;
+
+    const btn = document.getElementById('createAccountBtn');
+    btn.classList.add('loading');
+
+    try {
+        const res  = await fetch(`${API_BASE}/api/register`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ full_name: fullName, username, email, password: pass })
+        });
+        const data = await res.json();
+
+        btn.classList.remove('loading');
+
+        if (data.ok) {
+            // Show success overlay
+            document.getElementById('successOverlay').classList.add('show');
+            showToast(`🎉 Welcome, ${fullName}! Account created successfully.`);
+            // Redirect to login after 2.5s
+            setTimeout(() => {
+                window.location.href = 'index.html?toast=account_created&email=' + encodeURIComponent(email);
+            }, 2500);
+        } else {
+            showToast(data.message || 'Registration failed. Please try again.', true);
+            // If email/username duplicate — go back to step 0
+            if (data.message && (data.message.includes('email') || data.message.includes('username'))) {
+                showStep(0);
+            }
+        }
+    } catch (err) {
+        btn.classList.remove('loading');
+        showToast('Cannot connect to server. Make sure the server is running on port 3000.', true);
+        console.error('[REGISTER FETCH ERROR]', err);
+    }
+});
+
+// ---- SOCIAL SIGNUP (mock → API register + login) ----
+document.querySelectorAll('.social-icon').forEach(icon => {
+    icon.addEventListener('click', async () => {
+        const platform  = icon.dataset.platform || 'Social';
+        const mockEmail = `${platform.toLowerCase()}_user@${platform.toLowerCase()}.com`;
+        const mockName  = `${platform} User`;
+        const mockUser  = platform.toLowerCase() + '_user';
+        const mockPass  = `${platform}Pass2026!`;
+        showToast(`🔐 Creating account via ${platform}...`);
+        try {
+            // Try register (safe to call even if exists)
+            await fetch(`${API_BASE}/api/register`, {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ full_name: mockName, username: mockUser, email: mockEmail, password: mockPass })
+            });
+            // Login
+            const loginRes  = await fetch(`${API_BASE}/api/login`, {
+                method: 'POST',
+                credentials: 'include',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: mockEmail, password: mockPass })
+            });
+            const loginData = await loginRes.json();
+            if (loginData.ok) {
+                setTimeout(() => { window.location.href = 'ai.html'; }, 900);
+            } else {
+                showToast('Social signup failed. Please try email registration.', true);
+            }
+        } catch (err) {
+            showToast('Cannot connect to server. Make sure the server is running.', true);
+            console.error('[SOCIAL SIGNUP ERROR]', err);
+        }
+    });
+});
+
+// ---- TERMS MODAL ----
+function showTermsModal(e) {
+    e.preventDefault();
+    const modal = document.getElementById('termsModal');
+    modal.style.display = 'flex';
+    modal.style.animation = 'pageSlideIn 0.3s ease both';
+}
+function closeTermsModal() {
+    document.getElementById('termsModal').style.display = 'none';
+}
+document.getElementById('termsModal').addEventListener('click', function(e) {
+    if (e.target === this) closeTermsModal();
+});
+
+// ---- QUERY PARAM HANDLING ----
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get('action') === 'signup') {
+    showToast("Create your free Infinia AI account below!", false);
+}
+</script>
+</body>
+</html>
