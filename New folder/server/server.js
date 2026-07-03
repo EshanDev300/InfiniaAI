@@ -1,4 +1,4 @@
-// server.js — Infinia AI Server Engine (Production-Ready Pure Native Middleware)
+// server.js — Infinia AI Server Engine (Production-Ready Serverless Fallback)
 // ---------------------------------------------------------------------------------
 const express      = require('express');
 const cors         = require('cors');
@@ -23,19 +23,21 @@ app.use(express.static(staticDir));
 
 app.set('trust proxy', 1);
 
-// Lightweight JSON Client Request Session Middleware Fallback
+// Zero-dependency memory pipeline initialization
 app.use((req, res, next) => {
-    req.session = global.serverlessSessionStore || {};
+    if (!global.serverlessSessionStore) {
+        global.serverlessSessionStore = { userId: null, userEmail: null, userName: null };
+    }
+    req.session = global.serverlessSessionStore;
     next();
 });
 
-// Route Endpoints Sync Mapping
+// Route Interfaces Registration
 app.use('/api/auth', authRouter);
 app.use('/api/workspace', workspaceRouter);
 
-// Gemini Stream/Core Post Processing Request Node
+// Native AI Gemini Engine Bridge via Core Native Fetch
 app.post('/api/chat', async (req, res) => {
-    // Session user verification check
     if (!global.serverlessSessionStore || !global.serverlessSessionStore.userId) {
         return res.status(401).json({ error: 'Please sign in first.' });
     }
@@ -44,7 +46,7 @@ app.post('/api/chat', async (req, res) => {
     const apiKey = process.env.GEMINI_API_KEY;
 
     if (!apiKey) {
-        return res.status(500).json({ error: 'Gemini API Key configuration token missing on deployment engine.' });
+        return res.status(500).json({ error: 'Gemini API token is missing on deployment config.' });
     }
 
     try {
@@ -61,7 +63,7 @@ app.post('/api/chat', async (req, res) => {
         if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts[0]) {
             return res.json({ reply: data.candidates[0].content.parts[0].text });
         } else {
-            return res.status(500).json({ error: 'AI processing framework did not return content components.' });
+            return res.status(500).json({ error: 'AI engine did not return text blocks.' });
         }
     } catch (err) {
         return res.status(500).json({ error: err.message });
@@ -82,5 +84,5 @@ app.get('*', (req, res) => {
 module.exports = app;
 
 if (process.env.NODE_ENV !== 'production') {
-    app.listen(PORT, () => console.log(`[CORE ENGINE READY] Listening on Local Port: ${PORT}`));
+    app.listen(PORT, () => console.log(`[CORE ENGINE READY] Port: ${PORT}`));
 }
