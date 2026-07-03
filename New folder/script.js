@@ -9,7 +9,9 @@ camera.position.set(0, 2, 12);
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(window.devicePixelRatio);
-container.appendChild(renderer.domElement);
+if (container) {
+    container.appendChild(renderer.domElement);
+}
 
 // Lights
 const ambientLight = new THREE.AmbientLight(0x222222);
@@ -49,14 +51,12 @@ const partMat = new THREE.PointsMaterial({
 const particlesMesh = new THREE.Points(partGeo, partMat);
 scene.add(particlesMesh);
 
-// Resize handling
 window.addEventListener('resize', () => {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-// Animation Loop
 const clock = new THREE.Clock();
 function animate() {
     requestAnimationFrame(animate);
@@ -88,10 +88,9 @@ animate();
     }
 
     function scrollToCard(target) {
-        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
-    // --- Toast Alert helper ---
     function showToast(message, isError = false) {
         const old = document.querySelector('.toast-alert');
         if (old) old.remove();
@@ -101,14 +100,13 @@ animate();
             position: fixed; bottom: 24px; right: 24px; padding: 14px 24px;
             background: ${isError ? 'rgba(255,50,50,0.95)' : 'rgba(10,200,100,0.95)'};
             color: #fff; font-family: sans-serif; border-radius: 8px; font-weight: 500;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.4); z-index: 99999; animation: slideUp 0.3s ease;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4); z-index: 99999;
         `;
         toast.textContent = message;
         document.body.appendChild(toast);
         setTimeout(() => { toast.remove(); }, 3500);
     }
 
-    // Fix: localhost base URL strictly removed to allow production deployment API routing
     const API_BASE = '';
 
     // --- Submit Sign Up Form ---
@@ -116,23 +114,24 @@ animate();
     if (signupForm) {
         signupForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const name = document.getElementById('signup-name').value.trim();
+            const full_name = document.getElementById('signup-name').value.trim();
+            const username = document.getElementById('signup-username')?.value.trim() || full_name.split(' ')[0] + Math.floor(Math.random() * 100);
             const email = document.getElementById('signup-email').value.trim();
             const password = document.getElementById('signup-password').value.trim();
 
-            if (!name || !email || !password) {
-                showToast("Please fill in all fields.", true);
+            if (!full_name || !email || !password) {
+                showToast("Please fill in all required fields.", true);
                 return;
             }
 
             try {
-                const res = await fetch(`${API_BASE}/api/auth/signup`, {
+                const res = await fetch(`${API_BASE}/api/auth/register`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name, email, password })
+                    body: JSON.stringify({ full_name, username, email, password })
                 });
                 const data = await res.json();
-                if (res.ok) {
+                if (res.ok || data.ok) {
                     showToast("Account registered successfully! Redirecting to login...", false);
                     signupForm.reset();
                     setTimeout(() => scrollToCard(loginCard), 1500);
@@ -140,7 +139,7 @@ animate();
                     showToast(data.message || "Registration failed.", true);
                 }
             } catch (err) {
-                showToast("Cannot connect to server. Make sure the server is running.", true);
+                showToast("Cannot connect to server mapping paths.", true);
             }
         });
     }
@@ -165,46 +164,23 @@ animate();
                     body: JSON.stringify({ email, password })
                 });
                 const data = await res.json();
-                if (res.ok) {
+                if (res.ok || data.ok) {
                     showToast("Login successful! Entering Workspace...", false);
                     setTimeout(() => { window.location.href = 'ai.html'; }, 1000);
                 } else {
                     showToast(data.message || "Invalid credentials.", true);
                 }
             } catch (err) {
-                showToast("Cannot connect to server. Make sure the server is running on port 3000.", true);
+                showToast("Cannot connect to server assets.", true);
             }
         });
     }
 
-    // Social icon mock triggers
-    document.querySelectorAll('.social-icon').forEach(icon => {
-        icon.addEventListener('click', () => {
-            const platform = icon.querySelector('i')?.classList[1] || "social";
-            const email = `social_user@${platform.split('-')[1] || platform}.com`;
-            const name = platform.split('-')[1] || "Social User";
-            showToast(`🔐 Logging in via ${platform.toUpperCase()}...`, false);
-            localStorage.setItem('infinia_user', JSON.stringify({ email: email, name: name }));
-            setTimeout(() => { window.location.href = 'ai.html'; }, 1200);
-        });
-    });
-
-    // Query parameters parsing on load
     const urlParams = new URLSearchParams(window.location.search);
     const toastParam = urlParams.get('toast');
-    const actionParam = urlParams.get('action');
-
     if (toastParam === 'please_login') {
         showToast("Please sign in to access the AI workspace.", true);
-        setTimeout(() => scrollToCard(loginCard), 500);
     } else if (toastParam === 'logout_success') {
-        showToast("Logged out successfully. See you soon!", false);
-        setTimeout(() => scrollToCard(loginCard), 500);
-    }
-
-    if (actionParam === 'signup') {
-        setTimeout(() => scrollToCard(signupCard), 500);
-    } else if (actionParam === 'login') {
-        setTimeout(() => scrollToCard(loginCard), 500);
+        showToast("Logged out successfully.", false);
     }
 })();
