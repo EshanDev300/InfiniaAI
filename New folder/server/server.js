@@ -1,11 +1,11 @@
-// server.js — Infinia AI Server Engine (Production-Ready Serverless Fallback)
+// server/server.js — Infinia AI Server Engine (Universal Deployment Core)
 // ---------------------------------------------------------------------------------
-const express      = require('express');
-const cors         = require('cors');
-const path         = require('path');
-const { pool }     = require('./db');
+const express = require('express');
+const cors = require('cors');
+const path = require('path');
+const { pool } = require('./db');
 
-const authRouter      = require('./auth');
+const authRouter = require('./auth');
 const workspaceRouter = require('./workspace');
 
 const app = express();
@@ -18,25 +18,28 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Serve static frontend assets correctly from parent root directory
 const staticDir = path.join(__dirname, '../');
 app.use(express.static(staticDir));
 
 app.set('trust proxy', 1);
 
-// Zero-dependency memory pipeline initialization
+// Initialize a robust universal zero-dependency serverless session memory layout
+if (!global.serverlessSessionStore) {
+    global.serverlessSessionStore = { userId: null, userEmail: null, userName: null };
+}
+
+// Session routing inject bridge mapping
 app.use((req, res, next) => {
-    if (!global.serverlessSessionStore) {
-        global.serverlessSessionStore = { userId: null, userEmail: null, userName: null };
-    }
     req.session = global.serverlessSessionStore;
     next();
 });
 
-// Route Interfaces Registration
+// APIs Registration 
 app.use('/api/auth', authRouter);
 app.use('/api/workspace', workspaceRouter);
 
-// Native AI Gemini Engine Bridge via Core Native Fetch
+// Gemini AI Chat integration utilizing direct core low-level HTTP requests
 app.post('/api/chat', async (req, res) => {
     if (!global.serverlessSessionStore || !global.serverlessSessionStore.userId) {
         return res.status(401).json({ error: 'Please sign in first.' });
@@ -63,7 +66,7 @@ app.post('/api/chat', async (req, res) => {
         if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts[0]) {
             return res.json({ reply: data.candidates[0].content.parts[0].text });
         } else {
-            return res.status(500).json({ error: 'AI engine did not return text blocks.' });
+            return res.status(500).json({ error: 'AI infrastructure did not return structural response node components.' });
         }
     } catch (err) {
         return res.status(500).json({ error: err.message });
@@ -84,5 +87,5 @@ app.get('*', (req, res) => {
 module.exports = app;
 
 if (process.env.NODE_ENV !== 'production') {
-    app.listen(PORT, () => console.log(`[CORE ENGINE READY] Port: ${PORT}`));
+    app.listen(PORT, () => console.log(`[CORE MODULE ENGINE ACTIVE] Local Node Port: ${PORT}`));
 }
