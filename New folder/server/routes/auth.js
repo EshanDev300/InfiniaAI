@@ -1,11 +1,7 @@
-// auth.js — Lightweight Authentication Endpoint Architecture
+// server/auth.js — Cloud Safe Authentication Processor
 const express = require('express');
 const { pool } = require('./db');
 const router = express.Router();
-
-if (!global.serverlessSessionStore) {
-    global.serverlessSessionStore = { userId: null, userEmail: null, userName: null };
-}
 
 function respond(res, status, ok, message, data = {}) {
     return res.status(status).json({ ok, message, ...data });
@@ -29,7 +25,7 @@ router.post('/register', async (req, res) => {
         );
         return respond(res, 201, true, 'Account created successfully!');
     } catch (err) {
-        return respond(res, 500, false, 'Registration database query exception.');
+        return respond(res, 500, false, 'Registration framework storage failure.');
     }
 });
 
@@ -54,7 +50,7 @@ router.post('/login', async (req, res) => {
             user: { id: user.id, full_name: user.full_name, email: user.email }
         });
     } catch (err) {
-        return respond(res, 500, false, 'Auth stack layer processing error.');
+        return respond(res, 500, false, 'Internal validation error.');
     }
 });
 
