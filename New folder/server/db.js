@@ -1,4 +1,4 @@
-// server/db.js — MySQL Connection Pool System
+// server/db.js — Stable Connection Pool
 const fs = require('fs');
 const path = require('path');
 
@@ -21,24 +21,20 @@ try {
             }
         });
     }
-} catch (err) {
-    console.error('Error loading .env file:', err);
-}
+} catch (err) {}
 
 const mysql = require('mysql2/promise');
 
 const pool = mysql.createPool({
-    host:     process.env.DB_HOST     || 'localhost',
-    port:     parseInt(process.env.DB_PORT || '3306'),
-    user:     process.env.DB_USER     || 'root',
+    host: process.env.DB_HOST || 'localhost',
+    port: parseInt(process.env.DB_PORT || '3306'),
+    user: process.env.DB_USER || 'root',
     password: process.env.DB_PASSWORD || '',       
-    database: process.env.DB_NAME     || 'infinia_ai',
+    database: process.env.DB_NAME || 'infinia_ai',
     waitForConnections: true,
-    connectionLimit: 3, 
+    connectionLimit: 2, // Minimal footprint to avoid pool connection timeouts
     queueLimit: 0,
-    ssl: {
-        rejectUnauthorized: true
-    }
+    ssl: { rejectUnauthorized: true }
 });
 
 module.exports = { pool };
